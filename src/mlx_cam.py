@@ -154,14 +154,26 @@ class MLX_Cam:
         else:
             offset = 0.0
             scale = 1.0
+        #heat_values = []
+        
         for row in range(self._height):
             line = ""
+           # max_heat = 0
+            
             for col in range(self._width):
                 pix = int((array[row * self._width + (self._width - col - 1)]
                           + offset) * scale)
+                # if the pix value is greater than the current heat value than save
+                # new max_heat value for col 
+#                 if pix > max_heat:
+#                 max_heat = pix
+#                 position = col
                 if col:
                     line += ","
                 line += f"{pix}"
+                
+#             heat_values.append()
+#             avg = 
             yield line
         return
 
@@ -278,7 +290,7 @@ def test_MLX_cam():
             # could also be written to a file. Spreadsheets, Matlab(tm), or
             # CPython can read CSV and make a decent false-color heat plot.
             show_image = False
-            show_csv = False
+            show_csv = True
             if show_image:
                 camera.ascii_image(image)
             elif show_csv:
@@ -297,7 +309,9 @@ def test_MLX_cam():
 
 
 if __name__ == "__main__":
-
-    test_MLX_cam()
-
+    
+     test_MLX_cam()
+    
+    
+    
 
