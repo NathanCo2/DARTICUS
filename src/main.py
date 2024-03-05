@@ -16,19 +16,20 @@ import cotask
 import task_share
 from motor_driver import MotorDriver
 from encoder_reader import Encoder
-from motor_controller_4 import MotorController
+from motor_controller import MotorController
 import utime
-import cqueue
 
 
-def task1_fun(shares):
+def Pivot(shares):
     """!
-    Task which runs motor 1. Initiliazes then calls run()
-    @param setpoint Defines the desired setpoint of the controller
-    @param gain Defines the proportional gain of the controller
+    Task which runs motor attached to tier 1 turntable. Pivots DARTICUS 180*
+    Initiliazes then calls run(), setting a GO1 flag when reached
+    Parameters in shares
+    @param setpoint Defines the desired setpoint (Infrared Camera position)
+    @param Pgain Defines the proportional gain of the controller
     """
     # Get references to the gain and setpoint which have been passed to this task
-    gain, setpoint, time, val = shares
+    setpoint, Pgain = shares
     
     # Initialize motor drivers and encoders
     # set up timer 8 for encoder 2
@@ -49,7 +50,7 @@ def task1_fun(shares):
     Tom = MotorDriver(pinc1, pina0, pina1, TIM5)
     Jerry.zero()
     # Create motor controller
-    Deitch = MotorController(gain, setpoint, Tom.set_duty_cycle, Jerry.read, time, val)
+    Deitch = MotorController(gain, setpoint, Tom.set_duty_cycle, Jerry.read)
     #print("start")
     for i in range(100):
         Deitch.run()
@@ -59,11 +60,15 @@ def task1_fun(shares):
     while True: # once done twiddle them thumbs
         yield
 
-def task2_fun(shares):
+def Aim(shares):
     """!
-    Task which runs motor 2. Initializes then calls run()
-    @param setpoint Defines the desired setpoint of the controller
-    @param gain Defines the proportional gain of the controller
+    Task which runs motor attached to tier 2 turntable to aim blaster at high resolution
+    Initializes then calls run(), setting a GO2 flag when reached
+    Parameters in shares
+    @param setpoint Defines the desired setpoint (Infrared Camera position)
+    @param Pgain Defines the proportional gain of the controller
+    @param Igain Defines the integral gain of the controller
+    @param Dgain Defines the derivative gain of the controller
     """
     # Get references to the gain and setpoint which have been passed to this task
     gain, setpoint, time, val = shares
@@ -97,24 +102,46 @@ def task2_fun(shares):
     
     while True:
         yield
+        
+def Fire(shares):
+    """!
+    Task which runs servo when all setpoints are reached. Initializes then waits for go flags
+    @param setpoint Defines the desired setpoint of the controller
+    @param gain Defines the proportional gain of the controller
+    """
+    # Get references to the gain and setpoint which have been passed to this task
+    #gain, setpoint, time, val = shares
+     
+    # Initialize servo
+    # Set up timer 4 for encoder 1
+    TIM4 = pyb.Timer()
 
+def Track(shares):
+    """!
+    Task which uses mlx_cam to track target
+    Sets setpoint for Aim
+    """
+     
+    # Initialize Camera
+    # Get image (raw file, nonblocking)
+    # Digest data (find column with highest heat signature)
+    # Convert to set point (some fancy trig using 55 deg FOV and known table length
+    # Get setpoint to Aim task
+        
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
 # tasks run until somebody presses ENTER, at which time the scheduler stops and
 # printouts show diagnostic information about the tasks, share, and queue.
 if __name__ == "__main__":
-    #print("Testing two motor at once"
-    #      "Press Ctrl-C to stop and show diagnostics.")
     
-    # Create variables to pass to tasks. queues are for printing data, gain and setpoint are input
-    time1 = cqueue.FloatQueue(100)
-    val1 = cqueue.FloatQueue(100)
-    time2 = cqueue.FloatQueue(100)
-    val2 = cqueue.FloatQueue(100)
+    # Initialize camera object
     
-    gain1 = 0.1
+    # Idle while digesting data
+    gain = 0.1
     setpoint1 = 50000
     
-    gain2 = 0.1
+    Pgain = 0.1
+    Igain = 0
+    Dgain = 0
     setpoint2 = 50000
     
     # Create the tasks. If trace is enabled for any task, memory will be
@@ -122,13 +149,18 @@ if __name__ == "__main__":
     # of memory after a while and quit. Therefore, use tracing only for 
     # debugging and set trace to False when it's not needed
     
-    task1 = cotask.Task(task1_fun, name="Task_1", priority=2, period=50,
+    task1 = cotask.Task(Pivot, name="Pivot", priority=1, period=100,
                         profile=True, trace=False, shares=(gain1, setpoint1, time1, val1))
-    task2 = cotask.Task(task2_fun, name="Task_2", priority=1, period=20,
+    task2 = cotask.Task(Aim, name="Aim", priority=2, period=100,
                         profile=True, trace=False, shares=(gain2, setpoint2, time2, val2))
-    
+    task3 = cotask.Task(Fire, name="Fire", priority=3, period=100,
+                        profile=True, trace=False, shares=(gain2, setpoint2, time2, val2))
+    task4 = cotask.Task(Sight, name="Sight", priority=4, period=10,
+                        profile=True, trace=False, shares=(gain2, setpoint2, time2, val2))
     cotask.task_list.append(task1)
     cotask.task_list.append(task2)
+    cotask.task_list.append(task3)
+    cotask.task_list.append(task3)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
@@ -142,11 +174,11 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             break
         
-    # Print a table of task data and a table of shared information data
-    #print('\n' + str (cotask.task_list))
-    #print(task_share.show_all())
-    #print(task1.get_trace())
-    #print('')
+    #Print a table of task data and a table of shared information data
+    print('\n' + str (cotask.task_list))
+    print(task_share.show_all())
+    print(task1.get_trace())
+    print('')
     
     
     # pass information to laptop for plotting
