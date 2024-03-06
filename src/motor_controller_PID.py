@@ -117,12 +117,12 @@ if __name__ == "__main__":
     
     # one full rotation is 32653.44 for top tier
     # angle1 = 
-    setpoint1 = 1000
+    setpoint1 = -1000
     KP1 = 0.9
     KI1 = 0
     KD1 = 0
     
-    setpoint2 = 1000
+    setpoint2 = -1000
     KP2 = 0.8
     KI2 = 0
     KD2 = 0

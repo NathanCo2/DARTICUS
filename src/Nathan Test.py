@@ -166,14 +166,26 @@ class MLX_Cam:
                 line += f"{pix}"
             yield line
         return
-
+    def get_array(self, array, limits=None):
+        pic = []  # Initialize an empty list to hold the processed array
+        if limits and len(limits) == 2:
+            scale = (limits[1] - limits[0]) / (max(array) - min(array))
+            offset = limits[0] - min(array)
+        else:
+            offset = 0.0
+            scale = 1.0
+        
+        for row in range(self._height):
+            for col in range(self._width):
+                pic.append(int((array[row * self._width + (self._width - col - 1)] + offset) * scale))
+        return pic
     ## @brief   Find which col has highest heat signature
     #  @details This function sees which col has the highest number
     #           of max heat signatures, comparing each val of row 
     #  @param   array The array of data to be processed
     #  @param   limits A 2-iterable containing the maximum and minimum values
     #           to which the data should be scaled, or @c None for no scaling
-    def get_max_col_search(self, array, limits=None):
+    def get_max_col(self, array, limits=None):
         if limits and len(limits) == 2:
             scale = (limits[1] - limits[0]) / (max(array) - min(array))
             offset = limits[0] - min(array)
@@ -194,7 +206,6 @@ class MLX_Cam:
         # after looking through entire array, the position that shows up most in tally wins
         # Find the most common element(s)
         # Find the most common element in tally
-        print(tally)
         max_col_count = 0
         max_col = None
         for col in range(self._width):
@@ -202,34 +213,7 @@ class MLX_Cam:
             if col_count > max_col_count:
                 max_col_count = col_count
                 max_col = col
-        return max_col
-    
-    ## @brief   Find which col has highest heat signature by summing
-    #  @details This function sees which col has the highest number
-    #           of max heat signatures, comparing each val of row 
-    #  @param   array The array of data to be processed
-    #  @param   limits A 2-iterable containing the maximum and minimum values
-    #           to which the data should be scaled, or @c None for no scaling
-    def get_max_col_sum(self, array, limits=None):
-        if limits and len(limits) == 2:
-            scale = (limits[1] - limits[0]) / (max(array) - min(array))
-            offset = limits[0] - min(array)
-        else:
-            offset = 0.0
-            scale = 1.0
-        max_col_sum = 0
-        max_col = 0
-        for col in range(self._width):
-            col_sum = 0
-            for row in range(self._height):
-                # get scaled val to compare
-                pix = int((array[row * self._width + (self._width - col - 1)]
-                          + offset) * scale)
-                col_sum += pix
-            print(f'{col}: {col_sum}')
-            if col_sum > max_col_sum:
-                max_col_sum = col_sum
-                max_col = col
+            
         return max_col
     
     ## @brief   Get one image from a MLX90640 camera, @b blocking other tasks
@@ -293,78 +277,61 @@ class MLX_Cam:
 #  set to show better looking grayscale images in some terminal programs such
 #  as PuTTY. Unfortunately Thonny's terminal won't show the nice grayscale. 
 def test_MLX_cam():
-
-    import gc
-
-    # The following import is only used to check if we have an STM32 board such
-    # as a Pyboard or Nucleo; if not, use a different library
-    try:
-        from pyb import info
-
-    # Oops, it's not an STM32; assume generic machine.I2C for ESP32 and others
-    except ImportError:
-        # For ESP32 38-pin cheapo board from NodeMCU, KeeYees, etc.
-        i2c_bus = I2C(1, scl=Pin(22), sda=Pin(21))
-
-    # OK, we do have an STM32, so just use the default pin assignments for I2C1
-    else:
-        i2c_bus = I2C(1)
-
-    print("MXL90640 Easy(ish) Driver Test")
+    """!
+    Task which uses mlx_cam to track target
+    Sets setpoint for Aim
+    """
+    # Initialize I2C bus
+    i2c_bus = I2C(1)
 
     # Select MLX90640 camera I2C address, normally 0x33, and check the bus
     i2c_address = 0x33
-    scanhex = [f"0x{addr:X}" for addr in i2c_bus.scan()]
-    print(f"I2C Scan: {scanhex}")
 
     # Create the camera object and set it up in default mode
     camera = MLX_Cam(i2c_bus)
-    print(f"Current refresh rate: {camera._camera.refresh_rate}")
     camera._camera.refresh_rate = 10.0
-    print(f"Refresh rate is now:  {camera._camera.refresh_rate}")
 
-    while True:
-        try:
-            # Get and image and see how long it takes to grab that image
-            print("Click.", end='')
-            begintime = time.ticks_ms()
-#             image = camera.get_image()
+    # Get image (raw file, nonblocking)
+    # Get and image and see how long it takes to grab that image
+    # print("Click.", end='')
+    begintime = time.ticks_ms()
+    image = camera.get_image()
 
-            # Keep trying to get an image; this could be done in a task, with
-            # the task yielding repeatedly until an image is available
-            image = None
-            while not image:
-                image = camera.get_image_nonblocking()
-                time.sleep_ms(50)
+    # Keep trying to get an image; this could be done in a task, with
+    # the task yielding repeatedly until an image is available
+    image = None
+    while not image:
+        image = camera.get_image_nonblocking()
+        time.sleep_ms(10)
+    # Full image grabbed, yield image
+#     # Print the image data array
+#     for row in range(camera._height):
+#         for col in range(camera._width):
+#             print(image[row * camera._width + (camera._width - col - 1)], end=' ')
+#         print()  # Newline for each row
+#     pic = camera.get_array(image, limits=(0, 99))
+#     print(pic)
+    heat_values = []
+    max_heat = 0
+    for line in camera.get_csv(image, limits=(0, 99)):
+        print(line)
+    print(camera.get_max_col(image, limits=(0, 99)))
+    # Digest data (find column with highest heat signature)
+    # Creating an empty array to store the highest heat value in new array
 
-            print(f" {time.ticks_diff(time.ticks_ms(), begintime)} ms")
+     
+    # if the pix value is greater than the current heat value than save
+    # new max_heat value for col 
+#     for row in image:
+#         if pix > max_heat:
+#             max_heat = pix
+#             position = col
+                            
+    #heat_values.append()
+    # avg
 
-            # Can show image.v_ir, image.alpha, or image.buf; image.v_ir best?
-            # Display pixellated grayscale or numbers in CSV format; the CSV
-            # could also be written to a file. Spreadsheets, Matlab(tm), or
-            # CPython can read CSV and make a decent false-color heat plot.
-            show_image = False
-            show_csv = True
-            if show_image:
-                camera.ascii_image(image)
-            elif show_csv:
-                for line in camera.get_csv(image, limits=(0, 99)):
-                    print(line)
-                camera.ascii_art(image)
-            else:
-                camera.ascii_art(image)
-            
-            print(camera.get_max_col_sum(image, limits=(0, 99)))
-            
-            gc.collect()
-            print(f"Memory: {gc.mem_free()} B free")
-            time.sleep_ms(3141)
-
-        except KeyboardInterrupt:
-            break
-
-    print ("Done.")
-
+    # Convert to set point (some fancy trig using 55 deg FOV and known table length
+    # Get setpoint to Aim task
 
 if __name__ == "__main__":
     
