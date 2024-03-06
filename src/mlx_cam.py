@@ -157,22 +157,13 @@ class MLX_Cam:
         
         for row in range(self._height):
             line = ""
-           # max_heat = 0
             
             for col in range(self._width):
                 pix = int((array[row * self._width + (self._width - col - 1)]
                           + offset) * scale)
-                # if the pix value is greater than the current heat value than save
-                # new max_heat value for col 
-#                 if pix > max_heat:
-#                 max_heat = pix
-#                 position = col
                 if col:
                     line += ","
                 line += f"{pix}"
-                
-#             heat_values.append()
-#             avg = 
             yield line
         return
 
@@ -311,6 +302,14 @@ if __name__ == "__main__":
     
      test_MLX_cam()
      heat_values = []
-    
+     max_heat = 0
+        # if the pix value is greater than the current heat value than save
+        # new max_heat value for col 
+        if pix > max_heat:
+            max_heat = pix
+            position = col
+                            
+    heat_values.append()
+    avg = 
     
 
