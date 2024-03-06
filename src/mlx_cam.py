@@ -23,6 +23,7 @@
 #      License, version 3.
 
 import utime as time
+import numpy as np
 from machine import Pin, I2C
 from mlx90640 import MLX90640
 from mlx90640.calibration import NUM_ROWS, NUM_COLS, IMAGE_SIZE, TEMP_K
@@ -191,19 +192,17 @@ class MLX_Cam:
                     max_heat = pix
                     position = col
             tally.append(position) # add winning col to tally
-        # after looking through entire array, the position that shows up most in tally wins
-        # Find the most common element(s)
-        # Find the most common element in tally
-        print(tally)
-        max_col_count = 0
-        max_col = None
-        for col in range(self._width):
-            col_count = tally.count(col)
-            if col_count > max_col_count:
-                max_col_count = col_count
-                max_col = col
-        return max_col
-    
+        # find the avg of the winning col to see where target most likely lies
+        mean = np.mean(tally)
+        std_dev = np.std(tally)
+        lower_bound = mean - 3*std_dev
+        upper_bound = mean + 3*std_dev
+        # filter the data to get rid of outlying cols outside of 3*std_dev
+        filtered  = [x for x in data if lower_bound <= x <= upper_bound]
+        print('Filtered tally of winning col for 3 std dev:' filtered)
+        # take the average of the filtered column to find winning column
+        avg_col = np.mean(filtered)
+        
     ## @brief   Find which col has highest heat signature by summing
     #  @details This function sees which col has the highest number
     #           of max heat signatures, comparing each val of row 
