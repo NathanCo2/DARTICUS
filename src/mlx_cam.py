@@ -154,7 +154,6 @@ class MLX_Cam:
         else:
             offset = 0.0
             scale = 1.0
-        #heat_values = []
         
         for row in range(self._height):
             line = ""
@@ -311,7 +310,7 @@ def test_MLX_cam():
 if __name__ == "__main__":
     
      test_MLX_cam()
-    
+     heat_values = []
     
     
 
