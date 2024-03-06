@@ -148,10 +148,25 @@ def Track(shares):
                 image = camera.get_image_nonblocking()
                 yield
             # Full image grabbed, yield image
+            for line in image:
+                    print(line)
             yield image
-
+            
     # Digest data (find column with highest heat signature)
-    
+    # Creating an empty array to store the highest heat value in new array
+    heat_values = []
+    max_heat = 0
+     
+    # if the pix value is greater than the current heat value than save
+    # new max_heat value for col 
+    for row in image:
+        if  pix > max_heat:
+            max_heat = pix
+            position = col
+                            
+     heat_values.append()
+     avg =
+
     # Convert to set point (some fancy trig using 55 deg FOV and known table length
     # Get setpoint to Aim task
         
