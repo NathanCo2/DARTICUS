@@ -16,7 +16,7 @@ import cotask
 import task_share
 from motor_driver import MotorDriver
 from encoder_reader import Encoder
-from motor_controller import MotorController
+from motor_controller_PID import MotorController
 from mlx_cam import MLX_Cam
 import utime
 
