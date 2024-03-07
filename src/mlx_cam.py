@@ -23,7 +23,7 @@
 #      License, version 3.
 
 import utime as time
-import numpy as np
+import ulab as np
 from machine import Pin, I2C
 from mlx90640 import MLX90640
 from mlx90640.calibration import NUM_ROWS, NUM_COLS, IMAGE_SIZE, TEMP_K
@@ -174,7 +174,7 @@ class MLX_Cam:
     #  @param   array The array of data to be processed
     #  @param   limits A 2-iterable containing the maximum and minimum values
     #           to which the data should be scaled, or @c None for no scaling
-    def get_max_col_search(self, array, limits=None):
+    def get_angle(self, array, limits=None):
         if limits and len(limits) == 2:
             scale = (limits[1] - limits[0]) / (max(array) - min(array))
             offset = limits[0] - min(array)
@@ -199,10 +199,13 @@ class MLX_Cam:
         upper_bound = mean + 3*std_dev
         # filter the data to get rid of outlying cols outside of 3*std_dev
         filtered  = [x for x in data if lower_bound <= x <= upper_bound]
-        print('Filtered tally of winning col for 3 std dev:' filtered)
+        # print(f'Filtered tally of winning col for 3 std dev: {filtered}')
         # take the average of the filtered column to find winning column
         avg_col = np.mean(filtered)
-        
+        # translate winning col to angle (32 angles, 110 deg fov = 3.4375 deg per col)
+        angle = avg_col*3.4375
+        return angle
+    
     ## @brief   Find which col has highest heat signature by summing
     #  @details This function sees which col has the highest number
     #           of max heat signatures, comparing each val of row 
@@ -353,7 +356,7 @@ def test_MLX_cam():
             else:
                 camera.ascii_art(image)
             
-            print(camera.get_max_col_sum(image, limits=(0, 99)))
+            print(camera.get_angle(image, limits=(0, 99)))
             
             gc.collect()
             print(f"Memory: {gc.mem_free()} B free")

@@ -153,7 +153,7 @@ def Track(shares):
             angle = cam_angle
             setpoint = angle # need to get this setpoint to AIM task
             yield
-
+    break
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
 # tasks run until somebody presses ENTER, at which time the scheduler stops and
