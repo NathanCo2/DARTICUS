@@ -21,7 +21,7 @@ class MotorController:
     This class implements the Motor Controller for an ME405 kit. 
     """
 
-    def __init__ (self, Pgain, Igain, Dgain, setpoint, setdutycycle_f, getactual_f, timequeue, valqueue):
+    def __init__ (self, Pgain, Igain, Dgain, setpoint, setdutycycle_f, getactual_f, timequeue=cqueue.FloatQueue(2), valqueue=cqueue.FloatQueue(2)):
         """! 
         Creates an encoder object that can be used to measure
         the position of a motor
@@ -51,13 +51,14 @@ class MotorController:
         """!
         This method will run one pass of the control algorithm
         """
+        self.dt = 10/1000
         self.actual = self.getactual() # call read encoder function and get delta total
         #print(f'actual encoder position {self.actual}')
         self.err = self.setpoint - self.actual
         #print(f'err {self.err}')
         self.esum += self.err
         self.diff = self.err - self.lasterr
-        self.PWM = self.err*self.Pgain + self.esum*self.Igain + self.diff*self.Dgain
+        self.PWM = self.err*self.Pgain + self.esum*self.dt*self.Igain + self.diff*self.Dgain/self.dt
         # self.PWM = max(min(self.PWM, 100), -100) #This line of code suckss
         #print(f'PWM {self.PWM}')
         self.setdutycycle(self.PWM)
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     from encoder_reader import Encoder
     
     # Initialize motor drivers and encoders
-    length = 1000
+    length = 200
     time1 = cqueue.FloatQueue(length)
     val1 = cqueue.FloatQueue(length)
     time2 = cqueue.FloatQueue(length)
@@ -117,12 +118,12 @@ if __name__ == "__main__":
     
     # one full rotation is 32653.44 for top tier
     # angle1 = 
-    setpoint1 = -1000
+    setpoint1 = 0
     KP1 = 0.9
     KI1 = 0
     KD1 = 0
     
-    setpoint2 = -1000
+    setpoint2 = 2000
     KP2 = 0.8
     KI2 = 0
     KD2 = 0
@@ -144,7 +145,7 @@ if __name__ == "__main__":
     # Create motor driver
     Motor1 = MotorDriver(pina10, pinb4, pinb5, TIM3)
     # Create motor controller 1
-    Control1 = MotorController(KP1, KI1, KD1, setpoint1, Motor1.set_duty_cycle, Encoder1.read, time1, val1)
+    Control1 = MotorController(KP1, KI1, KD1, setpoint1, Motor1.set_duty_cycle, Encoder1.read)
     
     # set up timer 8 for encoder 2
     TIM8 = pyb.Timer(8, prescaler=1, period=0xFFFF) # Timer 8, no prescalar, frequency 100kHz
@@ -164,11 +165,16 @@ if __name__ == "__main__":
     Motor2 = MotorDriver(pinc1, pina0, pina1, TIM5)
     # create motor controller 2
     Control2 = MotorController(KP2, KI2, KD2, setpoint2, Motor2.set_duty_cycle, Encoder2.read, time2, val2)
-
-    for i in range(length):
-        Control1.run()
-        Control2.run()
-        utime.sleep_ms(1)
+    while True:
+        try:
+            for i in range(length):
+                Control1.run()
+                Control2.run()
+                utime.sleep_ms(10)
+            break
+        except KeyboardInterrupt:
+            break
+        
     print("Control 1 response")
     print(f"KP: {KP1}, KI: {KI1}, KD: {KD1}")
     Control1.controller_response()
@@ -176,7 +182,6 @@ if __name__ == "__main__":
     print("Control 2 response")
     print(f"KP: {KP2}, KI: {KI2}, KD: {KD2}")
     Control2.controller_response()
-    
     Motor1.set_duty_cycle(0)
     Motor2.set_duty_cycle(0)
     print("done")
