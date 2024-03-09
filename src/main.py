@@ -117,7 +117,18 @@ def Fire(shares):
     #gain, setpoint, time, val = shares
      
     # Initialize servo
-    # Set up timer 4 for encoder 1
+    pinA10 = pyb.Pin(pyb.Pin.board.PA10, pyb.Pin.OUT_PP)
+    # Timer channel 1
+    TIM1 = pyb.Timer(1, freq=50)
+    ch3 = TIM1.channel(3, pyb.Timer.PWM, pin=pinA10)
+    
+    ch3.pulse_width_percent(.75)
+    time.sleep(2)
+    ch3.pulse_width_percent(5)
+    time.sleep(2)
+    ch3.pulse_width_percent(8.75)
+    time.sleep(3)
+    
     yield
 
 
@@ -189,7 +200,7 @@ if __name__ == "__main__":
     cotask.task_list.append(task1)
     cotask.task_list.append(task2)
     cotask.task_list.append(task3)
-    cotask.task_list.append(task3)
+    cotask.task_list.append(task4)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
