@@ -14,12 +14,13 @@ import gc
 import pyb
 import cotask
 import task_share
+import utime
+
 from motor_driver import MotorDriver
 from encoder_reader import Encoder
 from motor_controller_PID import MotorController
+from servo_driver import ServoDriver
 from mlx_cam import MLX_Cam
-import utime
-
 
 def Pivot(shares):
     """!
@@ -115,9 +116,26 @@ def Fire(shares):
     """
     # Get references to the gain and setpoint which have been passed to this task
     #gain, setpoint, time, val = shares
-     
-    # Initialize servo
-    # Set up timer 4 for encoder 1
+    
+    # Define servo parameters MG 966R
+    servo_min = 500  # Minimum pulse width for the servo (in microseconds)
+    servo_max = 2500  # Maximum pulse width for the servo (in microseconds)
+    angle_range = 180
+    
+    # Create servo driver
+    serpo = ServoDriver(ch3,servo_min,servo_max,angle_range)
+    serpo.set_angle(120) # home
+    yield
+    serpo.set_angle(119) # retract servo slightly as first new signal fails
+    yield
+    while True:
+        if GO1 and GO2: # if both motors have reached setpoint within tolerance
+            serpo.set_angle(60) # FIREEE
+            yield
+            
+        
+
+    
     yield
 
 
@@ -153,7 +171,7 @@ def Track(shares):
             angle = cam_angle
             setpoint = angle # need to get this setpoint to AIM task
             yield
-    break
+
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
 # tasks run until somebody presses ENTER, at which time the scheduler stops and
@@ -189,7 +207,7 @@ if __name__ == "__main__":
     cotask.task_list.append(task1)
     cotask.task_list.append(task2)
     cotask.task_list.append(task3)
-    cotask.task_list.append(task3)
+    cotask.task_list.append(task4)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
