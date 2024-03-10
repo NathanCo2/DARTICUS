@@ -13,15 +13,15 @@ def Aim(shares):
     my_share, my_queue = shares
     counter = 0
     while True:
-        my_share.put(counter)
         counter += 1
-        yield 0
+        my_share.put(counter)
+        yield 
 
 def Fire(shares):
     the_share, the_queue = shares
     
     while True:
-        print(f"Share1: {the_share.get()} ", end='')
+        print(f"Share1: {the_share.get()} ")
         value = the_share.get()
         if value == 1:
             # Define pin assigments for example servo
@@ -50,19 +50,51 @@ def Fire(shares):
             time.sleep(2)
             
         else:
-            pass
+            yield
         
-        yield 0
-
     
-def task3_fun(shares2):
-    my_share2, my_queue2 = shares2
+def Pivot(shares2):
+    # Get references to the gain and setpoint which have been passed to this task
+    gain, setpoint = shares2
+    
+    # Initialize Values
     counter = 0
-#     while True:
-#         my_share2.put(counter)
-#         #my_queue2.put(counter)
-#         counter += 1
-#         yield 0
+    
+    # Create variables to pass to tasks. queues are for printing data, gain and setpoint are input
+    time1 = cqueue.FloatQueue(200)
+    val1 = cqueue.FloatQueue(200)
+
+    # Initialize motor drivers and encoders
+    # set up timer 8 for encoder 2
+    TIM8 = pyb.Timer(8, prescaler=1, period=0xFFFF) # Timer 8, no prescalar, frequency 100kHz
+    #Define pin assignments for encoder 2
+    pinc6 = pyb.Pin(pyb.Pin.board.PC6)
+    pinc7 = pyb.Pin(pyb.Pin.board.PC7)
+    # Create encoder object
+    Jerry = Encoder(pinc6, pinc7, TIM8)
+    
+    # setup motor
+    TIM5 = pyb.Timer(5, freq=2000) # Timer 5, frequency 2000Hz
+    # Define pin assignments for motor 2
+    pinc1 = pyb.Pin(pyb.Pin.board.PC1, pyb.Pin.OUT_PP)
+    pina0= pyb.Pin(pyb.Pin.board.PA0)
+    pina1 = pyb.Pin(pyb.Pin.board.PA1)    
+    # Create motor driver
+    Tom = MotorDriver(pinc1, pina0, pina1, TIM5)
+    Jerry.zero()
+    # Create motor controller
+    Deitch = MotorController(gain, setpoint, Tom.set_duty_cycle, Jerry.read, time1, val1)
+    for i in range(200):
+        Deitch.run()
+        yield
+    print("done 1")
+    Tom.set_duty_cycle(0)
+    
+    # once done set flag and wait
+    while True:
+        counter += 1
+        my_share2.put(counter)
+        yield 
 
 def task4_fun(shares2):
     the_share2, the_queue2 = shares2
@@ -86,7 +118,7 @@ if __name__ == "__main__":
                         profile=True, trace=False, shares=(share0, share1))
     task2 = cotask.Task(Fire, name="Fire", priority=2, period=100,
                         profile=True, trace=False, shares=(share0, share1))
-    task3 = cotask.Task(task3_fun, name="Task 3", priority=1, period=200,
+    task3 = cotask.Task(Pivot, name="Pivot", priority=1, period=200,
                         profile=True, trace=False, shares=(share1, share0))
     task4 = cotask.Task(task4_fun, name="Task 4", priority=3, period=200,
                         profile=True, trace=False, shares=(share1, share0))
