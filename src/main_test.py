@@ -29,7 +29,7 @@ def task1_fun(shares):
     @param gain Defines the proportional gain of the controller
     """
     # Get references to the gain and setpoint which have been passed to this task
-    gain, setpoint, time, val = shares
+    done, column = shares
     
     # Initialize motor drivers and encoders
     # set up timer 8 for encoder 2
