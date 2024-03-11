@@ -204,9 +204,9 @@ class MLX_Cam:
         # take the average of the filtered column to find winning column
         avg_col = sum(filtered)/len(filtered)
         # translate winning col to angle (32 angles, 110 deg fov = 3.4375 deg per col)
-        return avg_col        
-#         angle = avg_col*3.4375
-#         return angle
+        #return avg_col        
+        angle = avg_col*3.4375
+        return angle
     
     ## @brief   Find which col has highest heat signature by summing
     #  @details This function sees which col has the highest number
@@ -330,7 +330,7 @@ def test_MLX_cam():
     while True:
         try:
             # Get and image and see how long it takes to grab that image
-            print("Click.", end='')
+            #print("Click.", end='')
             begintime = time.ticks_ms()
 #             image = camera.get_image()
 
@@ -348,7 +348,7 @@ def test_MLX_cam():
             # could also be written to a file. Spreadsheets, Matlab(tm), or
             # CPython can read CSV and make a decent false-color heat plot.
             show_image = False
-            show_csv = True
+            show_csv = False
             if show_image:
                 camera.ascii_image(image)
             elif show_csv:
@@ -361,7 +361,7 @@ def test_MLX_cam():
             print(camera.get_angle(image, limits=(0, 99)))
             
             gc.collect()
-            print(f"Memory: {gc.mem_free()} B free")
+            #print(f"Memory: {gc.mem_free()} B free")
             time.sleep_ms(3141)
 
         except KeyboardInterrupt:
