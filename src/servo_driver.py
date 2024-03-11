@@ -68,23 +68,23 @@ if __name__ == "__main__":
     
     # Create servo driver
     serpo = ServoDriver(ch3,servo_min,servo_max,angle_range)
-#     serpo.set_angle(119)
-#     time.sleep(1)
-#     try:
-#         while True:
-#             if input('fire?'):
-#                 serpo.set_angle(60)
-#                 time.sleep(3)
-#                 break
-#     except KeyboardInterrupt:
-#         serpo.set_angle(120)
-#         time.sleep(1)
-#     serpo.set_angle(120)
-    while True:
-        time.sleep(2)
-        serpo.set_angle(60)
-        time.sleep(2)
+    serpo.set_angle(119)
+    time.sleep(1)
+    try:
+        while True:
+            if input('fire?'):
+                serpo.set_angle(60)
+                time.sleep(3)
+                break
+    except KeyboardInterrupt:
         serpo.set_angle(120)
+        time.sleep(1)
+    serpo.set_angle(120)
+#     while True:
+#         time.sleep(2)
+#         serpo.set_angle(60)
+#         time.sleep(2)
+#         serpo.set_angle(120)
         
         
         

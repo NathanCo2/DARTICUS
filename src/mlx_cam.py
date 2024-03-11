@@ -181,7 +181,7 @@ class MLX_Cam:
         else:
             offset = 0.0
             scale = 1.0
-        tally = []
+        self.tally = []
         for row in range(self._height):
             max_heat = 0 # reinit to compare for this row
             for col in range(self._width):
@@ -191,20 +191,23 @@ class MLX_Cam:
                 if pix > max_heat:
                     max_heat = pix
                     position = col
-            tally.append(position) # add winning col to tally
+            self.tally.append(position) # add winning col to tally
         # find the avg of the winning col to see where target most likely lies
-        mean = np.mean(tally)
-        std_dev = np.std(tally)
-        lower_bound = mean - 3*std_dev
-        upper_bound = mean + 3*std_dev
-        # filter the data to get rid of outlying cols outside of 3*std_dev
-        filtered  = [x for x in data if lower_bound <= x <= upper_bound]
-        # print(f'Filtered tally of winning col for 3 std dev: {filtered}')
-        # take the average of the filtered column to find winning column
-        avg_col = np.mean(filtered)
-        # translate winning col to angle (32 angles, 110 deg fov = 3.4375 deg per col)
-        angle = avg_col*3.4375
-        return angle
+        mean = sum(self.tally
+                   \) / len(self.tally)
+        return mean
+#         mean = np.mean(self.tally)
+#         std_dev = np.std(self.tally)
+#         lower_bound = mean - 3*std_dev
+#         upper_bound = mean + 3*std_dev
+#         # filter the data to get rid of outlying cols outside of 3*std_dev
+#         filtered  = [x for x in data if lower_bound <= x <= upper_bound]
+#         # print(f'Filtered tally of winning col for 3 std dev: {filtered}')
+#         # take the average of the filtered column to find winning column
+#         avg_col = np.mean(filtered)
+#         # translate winning col to angle (32 angles, 110 deg fov = 3.4375 deg per col)
+#         angle = avg_col*3.4375
+#         return angle
     
     ## @brief   Find which col has highest heat signature by summing
     #  @details This function sees which col has the highest number
