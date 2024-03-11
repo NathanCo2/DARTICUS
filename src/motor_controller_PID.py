@@ -21,7 +21,7 @@ class MotorController:
     This class implements the Motor Controller for an ME405 kit. 
     """
 
-    def __init__ (self, Pgain, Igain, Dgain, setpoint, setdutycycle_f, getactual_f, timequeue=cqueue.FloatQueue(2), valqueue=cqueue.FloatQueue(2)):
+    def __init__ (self, Pgain, Igain, Dgain, setpoint, setdutycycle_f, getactual_f, timequeue, valqueue):
         """! 
         Creates an encoder object that can be used to measure
         the position of a motor
@@ -46,12 +46,16 @@ class MotorController:
         self.valqueue = valqueue # queue for values
         self.esum = 0 #error sum to be used for I control
         self.lasterr = 0 # error
+        self.newt = 0
+        self.oldt = 0
         
     def run(self):
         """!
         This method will run one pass of the control algorithm
         """
-        self.dt = 10/1000
+        self.newt = utime.ticks_ms()
+        self.dt = (self.newt - self.oldt)/1000
+        print(self.dt)
         self.actual = self.getactual() # call read encoder function and get delta total
         #print(f'actual encoder position {self.actual}')
         self.err = self.setpoint - self.actual
@@ -60,12 +64,12 @@ class MotorController:
         self.diff = self.err - self.lasterr
         self.PWM = self.err*self.Pgain + self.esum*self.dt*self.Igain + self.diff*self.Dgain/self.dt
         # self.PWM = max(min(self.PWM, 100), -100) #This line of code suckss
-        #print(f'PWM {self.PWM}')
+        print(f'PWM {self.PWM}')
         self.setdutycycle(self.PWM)
         self.lasterr = self.err
         self.timequeue.put(utime.ticks_ms()) # puts time in queue
         self.valqueue.put(self.actual) # puts PWM in queue
-        
+        self.oldt = self.newt
     def set_setpoint(self,setpoint):
         """!
         This method sets up the setpoint for proportional control
@@ -110,7 +114,7 @@ if __name__ == "__main__":
     from encoder_reader import Encoder
     
     # Initialize motor drivers and encoders
-    length = 200
+    length = 300
     time1 = cqueue.FloatQueue(length)
     val1 = cqueue.FloatQueue(length)
     time2 = cqueue.FloatQueue(length)
@@ -123,7 +127,7 @@ if __name__ == "__main__":
     KI1 = 0
     KD1 = 0
     
-    setpoint2 = 2000
+    setpoint2 = -2000
     KP2 = 0.8
     KI2 = 0
     KD2 = 0
@@ -145,7 +149,7 @@ if __name__ == "__main__":
     # Create motor driver
     Motor1 = MotorDriver(pina10, pinb4, pinb5, TIM3)
     # Create motor controller 1
-    Control1 = MotorController(KP1, KI1, KD1, setpoint1, Motor1.set_duty_cycle, Encoder1.read)
+    Control1 = MotorController(KP1, KI1, KD1, setpoint1, Motor1.set_duty_cycle, Encoder1.read, time1, val1)
     
     # set up timer 8 for encoder 2
     TIM8 = pyb.Timer(8, prescaler=1, period=0xFFFF) # Timer 8, no prescalar, frequency 100kHz

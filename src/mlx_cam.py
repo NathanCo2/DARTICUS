@@ -324,7 +324,7 @@ def test_MLX_cam():
     # Create the camera object and set it up in default mode
     camera = MLX_Cam(i2c_bus)
     print(f"Current refresh rate: {camera._camera.refresh_rate}")
-    camera._camera.refresh_rate = 30.0
+    camera._camera.refresh_rate = 10.0
     print(f"Refresh rate is now:  {camera._camera.refresh_rate}")
 
     while True:
