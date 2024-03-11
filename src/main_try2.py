@@ -12,7 +12,7 @@ from servo_driver import ServoDriver
 
 def Aim(shares, shares2):
     my_share, my_queue = shares
-    pivot_done, queue2 = shares2
+    pivot_done, setpoint = shares2
     
     check = pivot_done.get()
     if check == 1:
@@ -59,7 +59,7 @@ def Fire(shares):
         
     
 def Pivot(shares2):
-    pivot_done, queue1 = shares2
+    pivot_done, setpoint = shares2
     
     if wait == True:
         # Initialize motor drivers and encoders
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     share1 = task_share.Share('h', thread_protect=False, name="Share 1")
 
     task1 = cotask.Task(Aim, name="Aim", priority=1, period=100,
-                        profile=True, trace=False, shares=(share0, share1))
+                        profile=True, trace=False, shares=(share0, share1, Q0))
     task2 = cotask.Task(Fire, name="Fire", priority=2, period=100,
                         profile=True, trace=False, shares=(share0, share1))
     task3 = cotask.Task(Pivot, name="Pivot", priority=4, period=200,
