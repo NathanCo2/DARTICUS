@@ -27,6 +27,7 @@ from machine import Pin, I2C
 from mlx90640 import MLX90640
 from mlx90640.calibration import NUM_ROWS, NUM_COLS, IMAGE_SIZE, TEMP_K
 from mlx90640.image import ChessPattern, InterleavedPattern
+import math
 
 
 ## @brief   Class which wraps an MLX90640 thermal infrared camera driver to
@@ -180,7 +181,10 @@ class MLX_Cam:
         else:
             offset = 0.0
             scale = 1.0
-        self.tally = []
+        tally = []
+        weights = []
+        total_weight = 0
+        position = 0
         for row in range(self._height):
             max_heat = 0 # reinit to compare for this row
             for col in range(self._width):
@@ -190,22 +194,47 @@ class MLX_Cam:
                 if pix > max_heat:
                     max_heat = pix
                     position = col
-            self.tally.append(position) # add winning col to tally
+            weights.append(max_heat) # uses pix value as weight
+            tally.append(position) # add winning col to tally
         # find the avg of the winning col to see where target most likely lies
-        mean = sum(self.tally)/len(self.tally)
-        squared_diff = sum((x - mean) ** 2 for x in self.tally)
-        variance = squared_diff / len(self.tally)
-        std_dev = variance ** 0.5
-        lower_bound = mean - 1.5*std_dev
-        upper_bound = mean + 1.5*std_dev
-        # filter the data to get rid of outlying cols outside of 3*std_dev
-        filtered  = [x for x in self.tally if lower_bound <= x <= upper_bound]
-        # print(f'Filtered tally of winning col for 3 std dev: {filtered}')
-        # take the average of the filtered column to find winning column
-        avg_col = sum(filtered)/len(filtered)
+        #use weighted average
+#         weighted_sum = sum(tally[i] * weights[i] for i in range(len(tally)))
+#         mean = weighted_sum / total_weight
+       
+        weighted_mean = sum(tally[i] * weights[i] for i in range(len(tally))) / sum(weights)
+        
+        # Compute the sum of weighted squared differences
+        weighted_squared_diff = sum(weights[i] * (tally[i] - weighted_mean) ** 2 for i in range(len(weights)))
+
+        # Compute the weighted variance
+        weighted_variance = weighted_squared_diff / sum(weights)
+        
+        # Compute the weighted standard deviation
+        std_dev = math.sqrt(weighted_variance)
+        
+        # Filter data points within 3 standard deviations
+        filtered_data = [(tally[i], weights[i]) for i in range(len(tally)) if abs(tally[i] - weighted_mean) <= 1.5 * std_dev]
+
+        # Recalculate the weighted mean using filtered data
+        filtered_tally = [data[0] for data in filtered_data]
+        filtered_weights = [data[1] for data in filtered_data]
+        filtered_weighted_mean = sum(filtered_tally[i] * filtered_weights[i] for i in range(len(filtered_tally))) / sum(filtered_weights)
+#         mean = sum(tally)/len(tally)
+#         squared_diff = sum((x - mean) ** 2 for x in tally)
+#         variance = squared_diff / len(tally)
+#         std_dev = variance ** 0.5
+#         lower_bound = mean - 2*std_dev
+#         upper_bound = mean + 2*std_dev
+#         # filter the data to get rid of outlying cols outside of 3*std_dev
+#         filtered  = [x for x in self.tally if lower_bound <= x <= upper_bound]
+#         # print(f'Filtered tally of winning col for 3 std dev: {filtered}')
+#         # take the average of the filtered column to find winning column
+#         avg_col = sum(filtered)/len(filtered)
+
         # translate winning col to angle (32 angles, 110 deg fov = 3.4375 deg per col)
         #return avg_col        
-        angle = avg_col*3.4375
+        
+        angle = (filtered_weighted_mean-16.5)*3.4375
         return angle
     
     ## @brief   Find which col has highest heat signature by summing

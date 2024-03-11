@@ -16,6 +16,7 @@ import pyb
 import cotask
 import task_share
 
+from servo_driver import ServoDriver
 from motor_driver import MotorDriver
 from encoder_reader import Encoder
 from motor_controller_PID import MotorController
@@ -23,6 +24,7 @@ from mlx_cam import MLX_Cam
 
 import utime
 import cqueue
+import math
 
 from machine import Pin, I2C
 # from mlx90640 import MLX90640
@@ -41,7 +43,7 @@ def Pivot(shares):
     # Get references to the gain and setpoint which have been passed to this task
     GO1 = shares
     
-    Pgain1 = 0.1
+    Pgain1 = 0.9
     Igain1 = 0
     Dgain1 = 0
     angle1 = 180
@@ -75,7 +77,7 @@ def Pivot(shares):
     #print("start")
     while True:
         AA.run()
-        if setpoint1-100 <= Jess.read() <= setpoint1+100:
+        if setpoint1-50 <= Jess.read() <= setpoint1+50:
             GO1.put(1) #GO1 = True
             break
     Jackie.set_duty_cycle(0)
@@ -95,10 +97,10 @@ def Aim(shares):
     # Get references to the gain and setpoint which have been passed to this task
     bullseye, GO2 = shares
     
-    Pgain2 = 0.8
+    Pgain2 = 0.5
     Igain2 = 0
     Dgain2 = 0
-    setpoint2 = 500 # This value will be updated by TRACK task
+    setpoint2 = 0 # This value will be updated by TRACK task
     timequeue2 = cqueue.FloatQueue(2)
     valqueue2 = cqueue.FloatQueue(2)
 
@@ -124,19 +126,26 @@ def Aim(shares):
     Deitch = MotorController(Pgain2, Igain2, Dgain2, setpoint2, Tom.set_duty_cycle, Jerry.read, timequeue2, valqueue2)
     
     
-    convert2 = 226.76*3*48/(360) # N1*N2*counts, encoder ticks per degree
+    convert2 = 2750/180 # For testing with just 227 gear drive, 2750 ticks for 180 deg
+    target_angle = 0
+    GO2flg = False
     while True:
         Deitch.run()
-        target_angle = bullseye.get()
-        setpoint2 = convert2*target_angle
-        print(setpoint2)
-        Deitch.set_setpoint(setpoint2)
+        if bullseye.get()-target_angle != 0:
+            target_angle = bullseye.get()
+            setpoint2 = -convert2*target_angle
+            print(setpoint2)
+            Deitch.set_setpoint(setpoint2)
         
-        if setpoint2-100 <= Jerry.read() <= setpoint2+100:
-            GO2.put(1) #GO2 = True
-#             print('FIRE')
+        if setpoint2-20 <= Jerry.read() <= setpoint2+20 and setpoint2 != 0:
+            if not GO2flg:
+                GO2.put(1) #GO2 = True
+                GO2flg = True
+                print('fire')
         else:
-            GO2.put(0)
+            if GO2flg: #if flag is on and we are out of range, reset GO2
+                GO2.put(0)
+                GO2flg = False
         yield
         
 def Fire(shares):
@@ -169,9 +178,14 @@ def Fire(shares):
     while True:
         if GO1.get() and GO2.get(): # if both motors have reached setpoint within tolerance
             serpo.set_angle(60) # FIREEE
-            yield
-    print('Target (should be) eliminated. Thank you for giving me life')
+            break
     yield
+    for i in range(10): # delay reset angle
+        yield
+    print('Target (should be) eliminated. Thank you for giving me life so I can take theirs')
+    serpo.set_angle(120)
+    while True:
+        yield
 
 
 def Track(shares):        
@@ -189,7 +203,8 @@ def Track(shares):
     # Create the camera object and set it up in default mode
     camera = MLX_Cam(i2c_bus)
     camera._camera.refresh_rate = 30.0
-
+    last_angle = 0 # init variable for filtering
+    
     # Get image (raw file, nonblocking)
     while True:
         # Get and image and see how long it takes to grab that image
@@ -202,10 +217,12 @@ def Track(shares):
             yield
         # Full image grabbed, yield image
         cam_angle = camera.get_angle(image, limits=(0, 99))
-        print(f'Camera angle sent from Track:{cam_angle}')
         # will need to translate origin from camera to gun
-        angle = cam_angle
-        bullseye.put(angle) # gives angle of target to Track
+        if abs(cam_angle - last_angle) >= 2.5: # only update if angle has changed by 2 degrees
+            angle = math.degrees(math.atan((10 / 18) * math.tan(math.radians(cam_angle))))
+            bullseye.put(angle) # gives angle of target to Track
+            print(f'Camera angle sent from Track:{angle}')
+        last_angle = cam_angle
         yield
 
 
@@ -219,7 +236,7 @@ if __name__ == "__main__":
     GO1 = task_share.Share('h', thread_protect=False, name="Go 1")
     GO2 = task_share.Share('h', thread_protect=False, name="Go 2")
     bullseye = task_share.Share('f', thread_protect=False, name="bullseye")
-    
+    GO1.put(1)
     # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
@@ -228,16 +245,16 @@ if __name__ == "__main__":
     
     task1 = cotask.Task(Pivot, name="Pivot", priority=1, period=30,
                         profile=True, trace=False, shares=(GO1))
-    task2 = cotask.Task(Aim, name="Aim", priority=2, period=30,
+    task2 = cotask.Task(Aim, name="Aim", priority=4, period=30,
                         profile=True, trace=False, shares=(bullseye, GO2))
-    task3 = cotask.Task(Fire, name="Fire", priority=3, period=100,
+    task3 = cotask.Task(Fire, name="Fire", priority=2, period=400,
                         profile=True, trace=False, shares=(GO1, GO2))
-    task4 = cotask.Task(Track, name="Track", priority=4, period=100,
+    task4 = cotask.Task(Track, name="Track", priority=3, period=100,
                         profile=True, trace=False, shares=(bullseye))
    
 #     cotask.task_list.append(task1)
     cotask.task_list.append(task2)
-#     cotask.task_list.append(task3)
+    cotask.task_list.append(task3)
     cotask.task_list.append(task4)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
