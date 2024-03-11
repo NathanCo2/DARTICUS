@@ -23,6 +23,7 @@
 #      License, version 3.
 
 import utime as time
+import ulab as np
 from machine import Pin, I2C
 from mlx90640 import MLX90640
 from mlx90640.calibration import NUM_ROWS, NUM_COLS, IMAGE_SIZE, TEMP_K
@@ -192,19 +193,19 @@ class MLX_Cam:
                     position = col
             self.tally.append(position) # add winning col to tally
         # find the avg of the winning col to see where target most likely lies
-        mean = sum(self.tally)/len(self.tally)
-        squared_diff = sum((x - mean) ** 2 for x in self.tally)
-        variance = squared_diff / len(self.tally)
-        std_dev = variance ** 0.5
-        lower_bound = mean - 1.5*std_dev
-        upper_bound = mean + 1.5*std_dev
-        # filter the data to get rid of outlying cols outside of 3*std_dev
-        filtered  = [x for x in self.tally if lower_bound <= x <= upper_bound]
-        # print(f'Filtered tally of winning col for 3 std dev: {filtered}')
-        # take the average of the filtered column to find winning column
-        avg_col = sum(filtered)/len(filtered)
-        # translate winning col to angle (32 angles, 110 deg fov = 3.4375 deg per col)
-        return avg_col        
+        mean = sum(self.tally
+                   \) / len(self.tally)
+        return mean
+#         mean = np.mean(self.tally)
+#         std_dev = np.std(self.tally)
+#         lower_bound = mean - 3*std_dev
+#         upper_bound = mean + 3*std_dev
+#         # filter the data to get rid of outlying cols outside of 3*std_dev
+#         filtered  = [x for x in data if lower_bound <= x <= upper_bound]
+#         # print(f'Filtered tally of winning col for 3 std dev: {filtered}')
+#         # take the average of the filtered column to find winning column
+#         avg_col = np.mean(filtered)
+#         # translate winning col to angle (32 angles, 110 deg fov = 3.4375 deg per col)
 #         angle = avg_col*3.4375
 #         return angle
     
@@ -324,7 +325,7 @@ def test_MLX_cam():
     # Create the camera object and set it up in default mode
     camera = MLX_Cam(i2c_bus)
     print(f"Current refresh rate: {camera._camera.refresh_rate}")
-    camera._camera.refresh_rate = 30.0
+    camera._camera.refresh_rate = 10.0
     print(f"Refresh rate is now:  {camera._camera.refresh_rate}")
 
     while True:
@@ -339,7 +340,7 @@ def test_MLX_cam():
             image = None
             while not image:
                 image = camera.get_image_nonblocking()
-                time.sleep_ms(5)
+                time.sleep_ms(50)
 
             print(f" {time.ticks_diff(time.ticks_ms(), begintime)} ms")
 
