@@ -188,7 +188,7 @@ def Fire(shares):
     serpo.set_angle(119) # retract servo slightly as first new signal fails
     yield
     while True:
-        if GO1.get() and GO2.get(): # and (utime.ticks_ms()-START) > 4990: # if both motors have reached setpoint within tolerance
+        if GO1.get() and GO2.get(): # and (utime.ticks_ms()-START) > 4900: # if both motors have reached setpoint within tolerance
             serpo.set_angle(60) # FIREEE
             break
         yield
@@ -219,12 +219,12 @@ def Track(shares):
     last_angle = 0 # init variable for filtering
     image = None
     yield
-    while not image:
-        image = camera.get_image_nonblocking()
-        yield
-    while not image:
-        image = camera.get_image_nonblocking()
-        yield
+#     while not image:
+#         image = camera.get_image_nonblocking()
+#         yield
+#     while not image:
+#         image = camera.get_image_nonblocking()
+#         yield
     # Get image (raw file, nonblocking)
     while True:
         # Get and image and see how long it takes to grab that image
@@ -238,6 +238,7 @@ def Track(shares):
         # Full image grabbed, yield image
         cam_angle = camera.get_angle(image, limits=(0, 99))
         # will need to translate origin from camera to gun
+        yield
         if abs(cam_angle - last_angle) >= 1: # only update if angle has changed by 2 degrees
             angle = math.degrees(math.atan((9 / 16.42) * math.tan(math.radians(cam_angle))))
             bullseye.put(angle) # gives angle of target to Track
