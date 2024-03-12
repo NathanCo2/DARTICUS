@@ -37,7 +37,7 @@ class ServoDriver:
         # Calculate the pulse width for the given angle
         self.pulse_width = int(((angle / self.angle_range) * self.pulse_width_range + self.servo_min) *3.2)
         self.pwm.pulse_width(self.pulse_width)
-        print(f'Driving angle at {self.pulse_width} microsec pulse')
+#         print(f'Driving angle at {self.pulse_width} microsec pulse')
 
         
  

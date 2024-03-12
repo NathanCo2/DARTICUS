@@ -249,12 +249,12 @@ if __name__ == "__main__":
                         profile=True, trace=False, shares=(bullseye, GO2))
     task3 = cotask.Task(Fire, name="Fire", priority=2, period=400,
                         profile=True, trace=False, shares=(GO1, GO2))
-    task4 = cotask.Task(Track, name="Track", priority=3, period=100,
+    task4 = cotask.Task(Track, name="Track", priority=3, period=180,
                         profile=True, trace=False, shares=(bullseye))
    
 #     cotask.task_list.append(task1)
-    cotask.task_list.append(task2)
-    cotask.task_list.append(task3)
+#     cotask.task_list.append(task2)
+#     cotask.task_list.append(task3)
     cotask.task_list.append(task4)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
@@ -270,8 +270,8 @@ if __name__ == "__main__":
             break
         
     # Print a table of task data and a table of shared information data
-    #print('\n' + str (cotask.task_list))
-    #print(task_share.show_all())
-    #print(task1.get_trace())
-    #print('')
+    print('\n' + str (cotask.task_list))
+    print(task_share.show_all())
+    print(task1.get_trace())
+    print('')
     

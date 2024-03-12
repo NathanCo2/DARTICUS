@@ -46,15 +46,13 @@ class MotorController:
         self.valqueue = valqueue # queue for values
         self.esum = 0 #error sum to be used for I control
         self.lasterr = 0 # error
-        self.newt = 0
-        self.oldt = 0
         
     def run(self):
         """!
         This method will run one pass of the control algorithm
         """
-        self.newt = utime.ticks_ms()
-        self.dt = (self.newt - self.oldt)/1000
+#         self.newt = utime.ticks_ms()
+        self.dt = 30/1000
         self.actual = self.getactual() # call read encoder function and get delta total
 #         print(f'actual encoder position {self.actual}')
         self.err = self.setpoint - self.actual
@@ -68,7 +66,7 @@ class MotorController:
         self.lasterr = self.err
         self.timequeue.put(utime.ticks_ms()) # puts time in queue
         self.valqueue.put(self.actual) # puts PWM in queue
-        self.oldt = self.newt
+#         self.oldt = self.newt
         
         
     def set_setpoint(self,setpoint):
@@ -115,7 +113,7 @@ if __name__ == "__main__":
     from encoder_reader import Encoder
     
     # Initialize motor drivers and encoders
-    length = 150
+    length = 200
     time1 = cqueue.FloatQueue(length)
     val1 = cqueue.FloatQueue(length)
     time2 = cqueue.FloatQueue(length)
@@ -124,17 +122,17 @@ if __name__ == "__main__":
     # one full rotation is 32653.44 for top tier
     angle1 = -180
     convert1 = 47.2
-    setpoint1 = angle1*convert1
+    setpoint1 = 0 #12500
     KP1 = 0.9
     KI1 = 0
     KD1 = 0
     
-    angle2 = -42.1
-    convert2 = 2750/180 # test code for 227 gearbox with only small inertia
-    setpoint2 = convert2*angle2
-    KP2 = 0.9
-    KI2 = 0
-    KD2 = 0
+    angle2 = -20
+    convert2 = 4100/90 # test code for 227 gearbox with only small inertia
+    setpoint2 = 0 #convert2*angle2
+    KP2 = 0.3
+    KI2 = 0.001
+    KD2 = 0.001
     
     # Set up timer 4 for encoder 1
     TIM4 = pyb.Timer(4, prescaler=1, period=0xFFFF) # Timer 4, no prescalar, frequency 100kHz
@@ -175,14 +173,16 @@ if __name__ == "__main__":
     Control2 = MotorController(KP2, KI2, KD2, setpoint2, Motor2.set_duty_cycle, Encoder2.read, time2, val2)
     while True:
         try:
+            
+            angle2 = float(input('Angle: '))
+            setpoint2 = convert2*angle2
+#             Control2.controller_response()
+#             setpoint2 = float(input('Setpoint2: '))
+            Control2.set_setpoint(setpoint2)
             for i in range(length):
 #                 Control1.run()
                 Control2.run()
-                utime.sleep_ms(10)
-#             angle2 = float(input('Angle: '))
-#             setpoint2 = convert2*angle2
-            setpoint2 = float(input('Setpoint2: '))
-            Control2.set_setpoint(setpoint2)
+                utime.sleep_ms(20)
 #             break
         except KeyboardInterrupt:
             break
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     
     print("Control 2 response")
     print(f"KP: {KP2}, KI: {KI2}, KD: {KD2}")
-#     Control2.controller_response()
+    Control2.controller_response()
     Motor1.set_duty_cycle(0)
     Motor2.set_duty_cycle(0)
     print("done")
