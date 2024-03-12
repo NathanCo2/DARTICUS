@@ -188,7 +188,7 @@ def Fire(shares):
     serpo.set_angle(119) # retract servo slightly as first new signal fails
     yield
     while True:
-        if GO1.get() and GO2.get(): # and (utime.ticks_ms()-START) > 5000: # if both motors have reached setpoint within tolerance
+        if GO1.get() and GO2.get(): # and (utime.ticks_ms()-START) > 4990: # if both motors have reached setpoint within tolerance
             serpo.set_angle(60) # FIREEE
             break
         yield
@@ -251,7 +251,6 @@ def Track(shares):
 # tasks run until somebody presses ENTER, at which time the scheduler stops and
 # printouts show diagnostic information about the tasks, share, and queue.
 if __name__ == "__main__":
-    
     
     GO1 = task_share.Share('h', thread_protect=False, name="Go 1")
     GO2 = task_share.Share('h', thread_protect=False, name="Go 2")

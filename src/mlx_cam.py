@@ -234,7 +234,7 @@ class MLX_Cam:
         # translate winning col to angle (32 angles, 45 deg fov = 3.4375 deg per col)
         #return avg_col        
         
-        angle = (filtered_weighted_mean-15.5)*45/32
+        angle = (filtered_weighted_mean-15.5)*58/32
         return angle
     
     ## @brief   Find which col has highest heat signature by summing
