@@ -146,7 +146,7 @@ def Aim(shares):
             if not GO2flg:
                 GO2.put(1) #GO2 = True
                 GO2flg = True
-                print('fire')
+#                 print('fire')
                 yield
         else:
             if GO2flg: #if flag is on and we are out of range, reset GO2
@@ -245,7 +245,7 @@ def Track(shares):
         cam_angle = camera.get_angle(image, limits=(0, 99))
         # will need to translate origin from camera to gun
         if abs(cam_angle - last_angle) >= 2: # only update if angle has changed by 2 degrees
-            angle = math.degrees(math.atan((9 / 16.42) * math.tan(math.radians(cam_angle))))
+            angle = math.degrees(math.atan((9 / 16.5) * math.tan(math.radians(cam_angle))))
             bullseye.put(angle) # gives angle of target to Track
 #             print(f'Camera angle sent from Track:{angle}')
         last_angle = cam_angle
