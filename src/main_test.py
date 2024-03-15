@@ -43,14 +43,12 @@ def Pivot(shares):
     # Get references to the gain and setpoint which have been passed to this task
     GO1 = shares
     
-    Pgain1 = 0.9
+    Pgain1 = 0.2
     Igain1 = 0
     Dgain1 = 0
-    angle1 = 180
     timequeue1 = cqueue.FloatQueue(2)
     valqueue1 = cqueue.FloatQueue(2)
-    convert1 = 226.76*3*48/(360) # N1*N2*counts per revolution
-    setpoint1 = angle1*convert1
+    setpoint1 = -12000
     
     # Initialize motor drivers and encoders
     # Set up timer 4 for encoder 1
@@ -73,13 +71,15 @@ def Pivot(shares):
     # Create motor controller
     AA = MotorController(Pgain1, Igain1, Dgain1, setpoint1, Jackie.set_duty_cycle, Jess.read, timequeue1, valqueue1)
     #print("start")
-    
+    yield
     #print("start")
     while True:
         AA.run()
-        if setpoint1-50 <= Jess.read() <= setpoint1+50:
-            GO1.put(1) #GO1 = True
+        if setpoint1-1000 <= Jess.read() <= setpoint1+1000:
+            GO1.put(1)
             break
+        yield
+    yield
     Jackie.set_duty_cycle(0)
     while True: #twiddle them thumbs
         yield
@@ -95,11 +95,11 @@ def Aim(shares):
     @param Dgain Defines the derivative gain of the controller
     """
     # Get references to the gain and setpoint which have been passed to this task
-    bullseye, GO2 = shares
+    bullseye, GO2, kill = shares
     
-    Pgain2 = 0.5
-    Igain2 = 0
-    Dgain2 = 0
+    Pgain2 = 0.3
+    Igain2 = 0.001
+    Dgain2 = 0.01
     setpoint2 = 0 # This value will be updated by TRACK task
     timequeue2 = cqueue.FloatQueue(2)
     valqueue2 = cqueue.FloatQueue(2)
@@ -125,28 +125,44 @@ def Aim(shares):
     # Create motor controller
     Deitch = MotorController(Pgain2, Igain2, Dgain2, setpoint2, Tom.set_duty_cycle, Jerry.read, timequeue2, valqueue2)
     
-    
-    convert2 = 2750/180 # For testing with just 227 gear drive, 2750 ticks for 180 deg
+    yield
+    convert2 = 4100/90
     target_angle = 0
     GO2flg = False
     while True:
-        Deitch.run()
         if bullseye.get()-target_angle != 0:
-            target_angle = bullseye.get()
-            setpoint2 = -convert2*target_angle
-            print(setpoint2)
+            target_setpoint = convert2*bullseye.get()
+            if target_setpoint - setpoint2 < 0:
+                if target_setpoint < 0:
+                    setpoint2 = target_setpoint - 155 # offset for gear play
+                else:
+                    setpoint2 = target_setpoint + 155
+            else:
+                setpoint2 = target_setpoint
+#             print(setpoint2)
             Deitch.set_setpoint(setpoint2)
         
-        if setpoint2-20 <= Jerry.read() <= setpoint2+20 and setpoint2 != 0:
+        if setpoint2-100 <= Jerry.read() <= setpoint2+100 and setpoint2 != 0:
             if not GO2flg:
                 GO2.put(1) #GO2 = True
                 GO2flg = True
-                print('fire')
+#                 print('fire')
+                yield
         else:
             if GO2flg: #if flag is on and we are out of range, reset GO2
                 GO2.put(0)
                 GO2flg = False
+        
+        Deitch.run()
+        
+        if kill.get():
+            print('done')
+            Deitch.set_setpoint(0)
+            while True:
+                Deitch.run()
+                yield
         yield
+    
         
 def Fire(shares):
     """!
@@ -155,7 +171,9 @@ def Fire(shares):
     @param gain Defines the proportional gain of the controller
     """
     # Get references to the gain and setpoint which have been passed to this task
-    GO1, GO2 = shares
+    GO1, GO2, kill = shares
+    
+    START = utime.ticks_ms()
     
     # Define pin assigments for example servo
     # setup PWM pin
@@ -176,13 +194,14 @@ def Fire(shares):
     serpo.set_angle(119) # retract servo slightly as first new signal fails
     yield
     while True:
-        if GO1.get() and GO2.get(): # if both motors have reached setpoint within tolerance
+        if GO1.get() and GO2.get() and (utime.ticks_ms()-START) > 4000: # if both motors have reached setpoint within tolerance
             serpo.set_angle(60) # FIREEE
             break
-    yield
-    for i in range(10): # delay reset angle
+        yield
+    for i in range(100): # delay reset angle
         yield
     print('Target (should be) eliminated. Thank you for giving me life so I can take theirs')
+    kill.put(1)
     serpo.set_angle(120)
     while True:
         yield
@@ -204,7 +223,14 @@ def Track(shares):
     camera = MLX_Cam(i2c_bus)
     camera._camera.refresh_rate = 30.0
     last_angle = 0 # init variable for filtering
-    
+    image = None
+    yield
+#     while not image:
+#         image = camera.get_image_nonblocking()
+#         yield
+#     while not image:
+#         image = camera.get_image_nonblocking()
+#         yield
     # Get image (raw file, nonblocking)
     while True:
         # Get and image and see how long it takes to grab that image
@@ -218,10 +244,10 @@ def Track(shares):
         # Full image grabbed, yield image
         cam_angle = camera.get_angle(image, limits=(0, 99))
         # will need to translate origin from camera to gun
-        if abs(cam_angle - last_angle) >= 2.5: # only update if angle has changed by 2 degrees
-            angle = math.degrees(math.atan((10 / 18) * math.tan(math.radians(cam_angle))))
+        if abs(cam_angle - last_angle) >= 0: # only update if angle has changed by 2 degrees
+            angle = math.degrees(math.atan((9 / 16.42) * math.tan(math.radians(cam_angle))))
             bullseye.put(angle) # gives angle of target to Track
-            print(f'Camera angle sent from Track:{angle}')
+#             print(f'Camera angle sent from Track:{angle}')
         last_angle = cam_angle
         yield
 
@@ -232,29 +258,27 @@ def Track(shares):
 # printouts show diagnostic information about the tasks, share, and queue.
 if __name__ == "__main__":
     
-    
     GO1 = task_share.Share('h', thread_protect=False, name="Go 1")
     GO2 = task_share.Share('h', thread_protect=False, name="Go 2")
     bullseye = task_share.Share('f', thread_protect=False, name="bullseye")
-    GO1.put(1)
+    kill = task_share.Share('h', thread_protect=False, name="KILL")
     # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
     # debugging and set trace to False when it's not needed
     
-    
-    task1 = cotask.Task(Pivot, name="Pivot", priority=1, period=30,
+    task1 = cotask.Task(Pivot, name="Pivot", priority=3, period=20,
                         profile=True, trace=False, shares=(GO1))
-    task2 = cotask.Task(Aim, name="Aim", priority=4, period=30,
-                        profile=True, trace=False, shares=(bullseye, GO2))
-    task3 = cotask.Task(Fire, name="Fire", priority=2, period=400,
-                        profile=True, trace=False, shares=(GO1, GO2))
-    task4 = cotask.Task(Track, name="Track", priority=3, period=180,
+    task2 = cotask.Task(Aim, name="Aim", priority=4, period=20,
+                        profile=True, trace=False, shares=(bullseye, GO2, kill))
+    task3 = cotask.Task(Fire, name="Fire", priority=1, period=20,
+                        profile=True, trace=False, shares=(GO1, GO2, kill))
+    task4 = cotask.Task(Track, name="Track", priority=2, period=140,
                         profile=True, trace=False, shares=(bullseye))
    
-#     cotask.task_list.append(task1)
-#     cotask.task_list.append(task2)
-#     cotask.task_list.append(task3)
+    cotask.task_list.append(task1)
+    cotask.task_list.append(task2)
+    cotask.task_list.append(task3)
     cotask.task_list.append(task4)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
@@ -275,3 +299,4 @@ if __name__ == "__main__":
     print(task1.get_trace())
     print('')
     
+

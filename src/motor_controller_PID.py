@@ -46,13 +46,17 @@ class MotorController:
         self.valqueue = valqueue # queue for values
         self.esum = 0 #error sum to be used for I control
         self.lasterr = 0 # error
+        self.newt = 0
+        self.oldt = 0
         
     def run(self):
         """!
         This method will run one pass of the control algorithm
         """
-#         self.newt = utime.ticks_ms()
-        self.dt = 30/1000
+        self.newt = utime.ticks_ms()
+        self.dt = utime.ticks_diff(self.newt, self.oldt)/1000
+#         print(f'time difference {self.dt}')
+        #self.dt = 30/1000
         self.actual = self.getactual() # call read encoder function and get delta total
 #         print(f'actual encoder position {self.actual}')
         self.err = self.setpoint - self.actual
@@ -66,7 +70,7 @@ class MotorController:
         self.lasterr = self.err
         self.timequeue.put(utime.ticks_ms()) # puts time in queue
         self.valqueue.put(self.actual) # puts PWM in queue
-#         self.oldt = self.newt
+        self.oldt = self.newt
         
         
     def set_setpoint(self,setpoint):

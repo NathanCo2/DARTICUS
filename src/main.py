@@ -188,11 +188,11 @@ def Fire(shares):
     serpo.set_angle(119) # retract servo slightly as first new signal fails
     yield
     while True:
-        if GO1.get() and GO2.get(): # and (utime.ticks_ms()-START) > 4900: # if both motors have reached setpoint within tolerance
+        if GO1.get() and GO2.get() and (utime.ticks_ms()-START) > 2000: # if both motors have reached setpoint within tolerance
             serpo.set_angle(60) # FIREEE
             break
         yield
-    for i in range(100): # delay reset angle
+    for i in range(500): # delay reset angle
         yield
     print('Target (should be) eliminated. Thank you for giving me life so I can take theirs')
     kill.put(1)
@@ -238,8 +238,7 @@ def Track(shares):
         # Full image grabbed, yield image
         cam_angle = camera.get_angle(image, limits=(0, 99))
         # will need to translate origin from camera to gun
-        yield
-        if abs(cam_angle - last_angle) >= 1: # only update if angle has changed by 2 degrees
+        if abs(cam_angle - last_angle) >= 0: # only update if angle has changed by 2 degrees
             angle = math.degrees(math.atan((9 / 16.42) * math.tan(math.radians(cam_angle))))
             bullseye.put(angle) # gives angle of target to Track
 #             print(f'Camera angle sent from Track:{angle}')
@@ -268,13 +267,13 @@ if __name__ == "__main__":
                         profile=True, trace=False, shares=(bullseye, GO2, kill))
     task3 = cotask.Task(Fire, name="Fire", priority=1, period=20,
                         profile=True, trace=False, shares=(GO1, GO2, kill))
-    task4 = cotask.Task(Track, name="Track", priority=2, period=110,
+    task4 = cotask.Task(Track, name="Track", priority=2, period=130,
                         profile=True, trace=False, shares=(bullseye))
    
     cotask.task_list.append(task1)
-    cotask.task_list.append(task2)
-    cotask.task_list.append(task3)
-    cotask.task_list.append(task4)
+#     cotask.task_list.append(task2)
+#     cotask.task_list.append(task3)
+#     cotask.task_list.append(task4)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
