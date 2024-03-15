@@ -101,8 +101,8 @@ def Aim(shares):
     bullseye, GO2, kill = shares
     
     Pgain2 = 0.3
-    Igain2 = 0.001
-    Dgain2 = 0.01
+    Igain2 = 0.01
+    Dgain2 = 0.001
     setpoint2 = 0 # This value will be updated by TRACK task
     timequeue2 = cqueue.FloatQueue(2)
     valqueue2 = cqueue.FloatQueue(2)
@@ -138,12 +138,15 @@ def Aim(shares):
             setpoint2 = convert2*target_angle
 #             print(setpoint2)
             Deitch.set_setpoint(setpoint2)
+#             print(Jerry.read())
         
         if setpoint2-50 <= Jerry.read() <= setpoint2+50 and setpoint2 != 0:
+#             print(Jerry.read())
+#             print('go')
             if not GO2flg:
                 GO2.put(1) #GO2 = True
                 GO2flg = True
-#                 print('fire')
+                print('fire')
                 yield
         else:
             if GO2flg: #if flag is on and we are out of range, reset GO2
@@ -191,11 +194,11 @@ def Fire(shares):
     serpo.set_angle(119) # retract servo slightly as first new signal fails
     yield
     while True:
-        if GO1.get() and GO2.get() and (utime.ticks_ms()-START) > 2000: # if both motors have reached setpoint within tolerance
+        if GO1.get() and GO2.get(): # and (utime.ticks_ms()-START) > 300: #2000: # if both motors have reached setpoint within tolerance
             serpo.set_angle(60) # FIREEE
             break
         yield
-    for i in range(500): # delay reset angle
+    for i in range(200): # delay reset angle
         yield
     print('Target (should be) eliminated. Thank you for giving me life so I can take theirs')
     kill.put(1)
@@ -241,7 +244,7 @@ def Track(shares):
         # Full image grabbed, yield image
         cam_angle = camera.get_angle(image, limits=(0, 99))
         # will need to translate origin from camera to gun
-        if abs(cam_angle - last_angle) >= 0: # only update if angle has changed by 2 degrees
+        if abs(cam_angle - last_angle) >= 2: # only update if angle has changed by 2 degrees
             angle = math.degrees(math.atan((9 / 16.42) * math.tan(math.radians(cam_angle))))
             bullseye.put(angle) # gives angle of target to Track
 #             print(f'Camera angle sent from Track:{angle}')
@@ -265,19 +268,19 @@ if __name__ == "__main__":
     # of memory after a while and quit. Therefore, use tracing only for 
     # debugging and set trace to False when it's not needed
     
-    task1 = cotask.Task(Pivot, name="Pivot", priority=3, period=20,
+    task1 = cotask.Task(Pivot, name="Pivot", priority=2, period=30,
                         profile=True, trace=False, shares=(GO1))
-    task2 = cotask.Task(Aim, name="Aim", priority=4, period=20,
+    task2 = cotask.Task(Aim, name="Aim", priority=3, period=30,
                         profile=True, trace=False, shares=(bullseye, GO2, kill))
-    task3 = cotask.Task(Fire, name="Fire", priority=1, period=20,
+    task3 = cotask.Task(Fire, name="Fire", priority=4, period=30,
                         profile=True, trace=False, shares=(GO1, GO2, kill))
-    task4 = cotask.Task(Track, name="Track", priority=2, period=130,
+    task4 = cotask.Task(Track, name="Track", priority=1, period=90,
                         profile=True, trace=False, shares=(bullseye))
    
     cotask.task_list.append(task1)
-#     cotask.task_list.append(task2)
-#     cotask.task_list.append(task3)
-#     cotask.task_list.append(task4)
+    cotask.task_list.append(task2)
+    cotask.task_list.append(task3)
+    cotask.task_list.append(task4)
 
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started

@@ -52,6 +52,8 @@ class MotorController:
         """
         self.newt = utime.ticks_ms()
         self.dt = utime.ticks_diff(self.newt, self.oldt)/1000
+        if self.dt == 0:
+            self.dt = 30/1000
 #         print(f'time difference {self.dt}')
         #self.dt = 30/1000
         self.actual = self.getactual() # call read encoder function and get delta total
