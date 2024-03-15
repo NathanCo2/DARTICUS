@@ -1,12 +1,13 @@
 """!
 @file main.py
-    This file contains a demonstration program that runs some tasks, an
-    inter-task shared variable, and a queue. The tasks don't really @b do
-    anything; the example just shows how these elements are created and run.
+    This file is the main code used to run the thermal heating seeking nerf gun turrent, D.A.R.T.I.C.U.S.
+    D.A.R.T.I.C.U.S stands for Dueling Autonomous infraRed Tracking IronClad Unrivaled Sentry. The following
+    program contains an inter-task shared variable using four shares. This code sets up a STM32L476 intializing
+    two DC motors using PID control with encoder readers and a mlx90640 camera.  
 
-@author Jessica Perez, Jacquelyn Banh, and Nathan Chapman
+@author Nathan Chapman, Jacquelyn Banh, and Jessica Perez
 @author JR Ridgely
-@date   2021-Dec-15 JRR Created from the remains of previous example
+@date   2024-03-15 
 @copyright (c) 2015-2021 by JR Ridgely and released under the GNU
     Public License, Version 2. 
 """
@@ -36,7 +37,8 @@ def Pivot(shares):
     """!
     Task which runs motor attached to tier 1 turntable. Pivots DARTICUS 180*
     Initiliazes then calls run(), setting a GO1 flag when reached
-    Parameters in shares
+    
+    Parameters in shares:
     @param setpoint Defines the desired setpoint (Infrared Camera position)
     @param Pgain Defines the proportional gain of the controller
     """
@@ -88,7 +90,8 @@ def Aim(shares):
     """!
     Task which runs motor attached to tier 2 turntable to aim blaster at high resolution
     Initializes then calls run(), setting a GO2 flag when reached
-    Parameters in shares
+    
+    Parameters in shares:
     @param setpoint Defines the desired setpoint (Infrared Camera position)
     @param Pgain Defines the proportional gain of the controller
     @param Igain Defines the integral gain of the controller
@@ -256,7 +259,8 @@ if __name__ == "__main__":
     GO2 = task_share.Share('h', thread_protect=False, name="Go 2")
     bullseye = task_share.Share('f', thread_protect=False, name="bullseye")
     kill = task_share.Share('h', thread_protect=False, name="KILL")
-    # Create the tasks. If trace is enabled for any task, memory will be
+   
+   # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
     # debugging and set trace to False when it's not needed

@@ -1,15 +1,12 @@
 """!
-@file motor_controller.py
+@file motor_controller_PID.py
 
-This program develops a Motor Controller class that performs closed loop PID control.
-This requires the Motor Driver and Encoder class
-This program demonstrates the development of a class called MotorController to that
-perform closed-loop proportional control. This code was tested an ranwith the Motor
-Driver class and Encoder class developed in the previous labs to examine if the code
-was running correctly. 
+This program is a further development from the previously created Motor Controller class that
+performs closed loop PID control. This requires the use of the Motor Driver and Encoder class
+to run the program.
 
-@author Jessica Perez, Jacquelyn Banh, and Nathan Chapman
-@date   2024-03-5
+@author Nathan Chapman, Jacquelyn Banh, and Jessica Perez
+@date   2024-03-15
 """
 
 import pyb

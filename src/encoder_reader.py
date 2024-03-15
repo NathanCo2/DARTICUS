@@ -6,9 +6,9 @@ the movement of a motor using an optical encoder. This code was tested an ran
 with the Motor Driver class developed in Lab 1 to examine if the code was running
 correctly. 
 
-@author Jessica Perez, Jacquelyn Banh, and Nathan Chapman
+@author Nathan Chapman, Jacquelyn Banh, and Jessica Perez
 @date   2024-02-06 Original program, based on example from above listed source
-@copyright (c) 2024 by Jessica Perez, Jacquelyn Banh, and Nathan Chapman and released under the GNU Public Licenes V3
+@copyright (c) 2024 by Nathan Chapman, Jacquelyn Banh, and Jessica Perez and released under the GNU Public Licenes V3
 """
 
 import pyb
@@ -17,7 +17,7 @@ from motor_driver import MotorDriver
 
 class Encoder:
     """! 
-    This class implements a Encoder for an ME405 kit. 
+    This class implements a Encoder for an DC motor in the ME405 kit. 
     """
 
     def __init__ (self, ch1pin, ch2pin, timer):
@@ -39,8 +39,7 @@ class Encoder:
         
     def read(self):
         """!
-        This method returns the current position of the
-        motor using the encoder
+        This method returns the current position of the motor using the encoder
         """
         #print("Counter = ", self.timer.counter());
         #Accounts from overflow and underflow
@@ -62,8 +61,7 @@ class Encoder:
     
     def zero(self):
         """!
-        This method sets the encoder count to zero at the
-        current position of the motor
+        This method sets the encoder count to zero at the current position of the motor
         """
         self.timer.counter(0)
         #print ("Encoder count reset to zero")

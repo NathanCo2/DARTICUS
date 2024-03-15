@@ -1,9 +1,13 @@
 """!
 @file servo_driver.py
-Creates a driver to run a servo using angle input
 
-@author Nathan Chapman
-@date   2024-03-08
+This program demonstrates the development and implementation of a class called ServoDriver utilized
+to drive a MG996R Digital Servo. The software runs allowing for the driver to run with a servo using
+an angle input.
+
+@author Nathan Chapman, Jacquelyn Banh, and Jessica Perez
+@date   2024-03-15
+@copyright (c) 2024 by Nathan Chapman, Jacquelyn Banh, and Jessica Perez and released under the GNU Public Licenes V3
 """
 
 import pyb
