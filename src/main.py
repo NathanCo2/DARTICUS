@@ -101,7 +101,7 @@ def Aim(shares):
     bullseye, GO2, kill = shares
     
     Pgain2 = 0.3
-    Igain2 = 0.01
+    Igain2 = 0.001
     Dgain2 = 0.001
     setpoint2 = 0 # This value will be updated by TRACK task
     timequeue2 = cqueue.FloatQueue(2)
@@ -155,12 +155,12 @@ def Aim(shares):
         
         Deitch.run()
         
-        if kill.get():
-            print('done')
-            Deitch.set_setpoint(0)
-            while True:
-                Deitch.run()
-                yield
+#         if kill.get():
+#             print('done')
+#             Deitch.set_setpoint(0)
+#             while True:
+#                 Deitch.run()
+#                 yield
         yield
     
         
@@ -194,7 +194,7 @@ def Fire(shares):
     serpo.set_angle(119) # retract servo slightly as first new signal fails
     yield
     while True:
-        if GO1.get() and GO2.get(): # and (utime.ticks_ms()-START) > 300: #2000: # if both motors have reached setpoint within tolerance
+        if GO1.get() and GO2.get() and (utime.ticks_ms()-START) > 2500: # if both motors have reached setpoint within tolerance
             serpo.set_angle(60) # FIREEE
             break
         yield
@@ -274,7 +274,7 @@ if __name__ == "__main__":
                         profile=True, trace=False, shares=(bullseye, GO2, kill))
     task3 = cotask.Task(Fire, name="Fire", priority=4, period=30,
                         profile=True, trace=False, shares=(GO1, GO2, kill))
-    task4 = cotask.Task(Track, name="Track", priority=1, period=90,
+    task4 = cotask.Task(Track, name="Track", priority=1, period=110,
                         profile=True, trace=False, shares=(bullseye))
    
     cotask.task_list.append(task1)

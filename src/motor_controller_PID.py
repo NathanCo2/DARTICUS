@@ -177,10 +177,10 @@ if __name__ == "__main__":
     while True:
         try:
             
-            angle2 = float(input('Angle: '))
-            setpoint2 = convert2*angle2
+#             angle2 = float(input('Angle: '))
+#             setpoint2 = convert2*angle2
 #             Control2.controller_response()
-#             setpoint2 = float(input('Setpoint2: '))
+            setpoint2 = float(input('Setpoint2: '))
             Control2.set_setpoint(setpoint2)
             for i in range(length):
 #                 Control1.run()
