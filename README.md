@@ -7,7 +7,7 @@ From working on DARTICUS, members of the team have learned how to design, integr
 More specifically, the students have learned how to design motor and servo classes which allow them to drive multiple motor 
 objects for the base pulley system and the top geared system. 
 
- <img width="452" alt="Darticus" src="https://github.com/NathanCo2/DARTICUS/assets/156122419/812084c6-8635-43fa-9f2c-7f92980e53db">
+ <img width="500" alt="Darticus" src="https://github.com/NathanCo2/DARTICUS/assets/156122419/812084c6-8635-43fa-9f2c-7f92980e53db">
 
 DARTICUS is broken down into three main subsystems: the base pulley system, the top geared system, and the servo trigger system. 
 The base pulley system and the top geared system are designed to provide rotation about the z-axis to spin DARTICUS. The base 
@@ -25,7 +25,7 @@ the input voltage for the servo is now 5V. To locate the opponent, a thermal cam
 person. This camera is mounted on a stand that is placed at the middle of the distance between DARTICUS and the opponent. On the 
 off chance, DARTICUS malfunctions you can pull the bundled-up red wires to cut power to the servo and the motors. 
 
-<img width="245" alt="taskdiagram" src="https://github.com/NathanCo2/DARTICUS/assets/156122419/5eccd2cb-d0d3-4128-8b99-2d2b20ce43f6">
+<img width="500" alt="taskdiagram" src="https://github.com/NathanCo2/DARTICUS/assets/156122419/5eccd2cb-d0d3-4128-8b99-2d2b20ce43f6">
 
 The software architecture for DARTICUS is broken down into four main tasks which uses multitasking through the function cotask. 
 The task of the highest priority is the “Aim” task. The Aim task uses the target angle obtained from the camera reading to tell 
