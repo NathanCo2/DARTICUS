@@ -74,9 +74,10 @@ $(function(){initNavTree('index.html',''); initResizable(); });
 Hardware</h1>
 <p>The blaster selected for this project was a Nerf Rival Knockout XX - 100 Blaster. After researching, it was concluded this blaster met our system requirments with its high intensity and compact size. This spring-loaded blaster is manually loaded and utilizing a slide-action mechanism that has a single-fire. To pull the trigger it takes a 10lbf requiring us to carefully select a servo-motor that is capable of firing our system. A MG996R digital servo motor was selected as it operates within the torque range required to pull the trigger, abot 12 kg-cm for 6V.</p>
 <p>This project was developed with utilizing two DC motors that contolled the x-axis of motion. One DC motor is used for the 180 degree pivot that flips the blaster at the being of the duel using a pulley belt drive system. This motor is the same that was used in our previous labs. The other DC motor utilized was a Metal Gearmotor 25D MP 12V. This DC motor enabled a more accurate precision that was used to aim the blaster. It is important to note that both motors were ran with an Encoder to ensure optimal movements from our system.</p>
-<p>To enable the tracking a thermal camera, a mlx90640 camera, was used that allowed our system to read the heat signatures from the opposing team. The camera task will be futher elaborated on in the following sections. </p><pre class="fragment">Bill of Materials:
-
-Part                                    Quantity            Description
+<p>To enable the tracking a thermal camera, a mlx90640 camera, was used that allowed our system to read the heat signatures from the opposing team. The camera task will be futher elaborated on in the following sections.</p>
+<h2><a class="anchor" id="iBOM"></a>
+iBOM</h2>
+<p>Bill Of Materials </p><pre class="fragment">Part                                    Quantity            Description
 ---------------------------------------------------------------------------------------
 Blaster                                     1          Nerf Rival Knockout XX - 100 Blaster
 Stepper Motor                               1          For precise rotational movement
@@ -87,6 +88,15 @@ Machine Screw Zinc Screws                   1          For assembly
 Lab DC Motors                               1          For additional functionality
 Metal Gearmotor 25D                         1          Used to have more precise movements
 </pre><p> Other materials not listed were 3D print or found around lab. This includes bolts, zip-ties, spare wood, and various electrical components.</p>
+<h2><a class="anchor" id="Modeling"></a>
+Modeling</h2>
+<p>The following images display the developed CAD drawings that were utilized to house the Metal Gearmotor 25D MP 12V. The interal gears used to drive the aiming task of our system utilized a 3:1 ratio. The image below show a view inside the chamber and the gears used to drive the base of the lazy susan.</p>
+<div class="image">
+<img src="Clearview.png" alt="" width="500"/>
+</div>
+ <div class="image">
+<img src="InternalGears.png" alt="" width="500"/>
+</div>
 <h1><a class="anchor" id="System"></a>
 Tasks</h1>
 <p>There are a total of four task that run our design system. These task entail Pivot, Aim, Fire, and Track. A task diagram was developed and designed to layout the set of task for our multitasking system. The of importnace of each task. For our system is This is the overall task diagram that was implement to run our system. This section will break down the task that are preformed in the main section of our program. Each section will</p>

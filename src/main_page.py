@@ -19,7 +19,7 @@ The blaster selected for this project was a Nerf Rival Knockout XX - 100 Blaster
 concluded this blaster met our system requirments with its high intensity and compact size. This spring-loaded
 blaster is manually loaded and utilizing a slide-action mechanism that has a single-fire. To pull the trigger it
 takes a 10lbf requiring us to carefully select a servo-motor that is capable of firing our system. A MG996R digital
-servo motor was selected as it operates within the torque range required to pull the trigger, abot 12 kg-cm for 6V. 
+servo motor was selected as it operates within the torque range required to pull the trigger, abot 12 kg-cm for 6V.
 
 This project was developed with utilizing two DC motors that contolled the x-axis of motion. One DC motor
 is used for the 180 degree pivot that flips the blaster at the being of the duel using a pulley belt drive system.
@@ -30,7 +30,9 @@ that both motors were ran with an Encoder to ensure optimal movements from our s
 To enable the tracking  a thermal camera, a mlx90640 camera, was used that allowed our system to read the heat
 signatures from the opposing team. The camera task will be futher elaborated on in the following sections.
 
-    Bill of Materials:
+\subsection iBOM
+
+Bill Of Materials
 
     Part                                    Quantity            Description
     ---------------------------------------------------------------------------------------
@@ -46,6 +48,14 @@ signatures from the opposing team. The camera task will be futher elaborated on 
 Other materials not listed were 3D print or found around lab. This includes bolts, zip-ties, spare wood, and various
 electrical components.
 
+\subsection Modeling
+
+The following images display the developed CAD drawings that were utilized to house the Metal Gearmotor 25D MP 12V.
+The interal gears used to drive the aiming task of our system utilized a 3:1 ratio. The image below show a view inside
+the chamber and the gears used to drive the base of the lazy susan.
+
+\image html Clearview.png width=500 
+\image html InternalGears.png width=500
 
 \section System Tasks
 There are a total of four task that run our design system. These task entail Pivot, Aim, Fire, and Track. A task
