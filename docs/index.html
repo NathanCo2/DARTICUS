@@ -92,36 +92,51 @@ Metal Gearmotor 25D                         1          Used to have more precise
 Modeling</h2>
 <p>The following images display the developed CAD drawings that were utilized to house the Metal Gearmotor 25D MP 12V. The internal gears used to drive the aiming task of our system utilized a 3:1 ratio. The image below shows a view inside the chamber and the gears used to drive the base of the Lazy Susan.</p>
 <div class="image">
-<img src="Clearview.png" alt="" width="500"/>
+<img src="Clearview.png" alt="" width="400"/>
 </div>
  <div class="image">
-<img src="InternalGears.png" alt="" width="500"/>
+<img src="InternalGears.png" alt="" width="400"/>
 </div>
 <h1><a class="anchor" id="Software"></a>
 Organization</h1>
-<p>The following files are used in order to operate our system:</p>
+<p>The following files are used in order to operate our system: <a class="el" href="encoder__reader_8py.html" title="This program demonstrates the development of a class called Encoder to measure the movement of a moto...">encoder_reader.py</a>, <a class="el" href="motor__controller___p_i_d_8py.html" title="This program is a further development from the previously created Motor Controller class that perform...">motor_controller_PID.py</a>, <a class="el" href="motor__driver_8py.html" title="This program demonstrates the development of a class called MotorDriver utilized to drive DC motors i...">motor_driver.py</a>, <a class="el" href="servo__driver_8py.html" title="This program demonstrates the development and implementation of a class called ServoDriver utilized t...">servo_driver.py</a>, and <a class="el" href="mlx__cam_8py.html" title="RAW VERSION This version uses a stripped down MLX90640 driver which produces only raw data,...">mlx_cam.py</a>. The encoder reader is used to measure the motor movement through the use of an optical encorder. This allows us to determine the desired setpoint of our system. The motor controller file was developed to allow the system to operate utilizing PID control. The motor driver file is used to drive both of the DC motors. The servo driver file is used to run our servo driver to a specified angle and rest itself to pull the trigger. Lastly, the mlx camera file is to get the thermal camera readings and identify which column holds the highest average heat values. To read more about what each class entails look un the Files section.</p>
 <h1><a class="anchor" id="System"></a>
 Tasks</h1>
 <p>There are a total of four tasks that run our design system. These tasks entail Pivot, Aim, Fire, and Track. A task diagram was developed and designed to layout the set of task for our multitasking system. The importance of each task was determined along with the associated frequency. An image of the developed task diagram can be seen below that was used to run our system.</p>
 <div class="image">
-<img src="taskdiagram.png" alt="" width="500"/>
+<img src="taskdiagram.png" alt="" width="400"/>
 </div>
 <p>Mirroring a similar behavior to the developed task diagram, the finite state machine (FSM) developed for the overall system mimics the same pattern. An image of the FSM is shown below.</p>
 <div class="image">
-<img src="systemfsm.png" alt="" width="500"/>
+<img src="systemfsm.png" alt="" width="400"/>
 </div>
 <p>It is important to note that for our multi-tasking system shares are used to facilitate communication and data sharing among different task that are running concurrently. Each share in this system either set as a flag or set to a specfied value. The four shares used in this program are GO1, GO2, bullseye, and kill. The GO1 and GO2 shares are used as a flag to communicate that the following task is completed. The bullseye share is used to convey the angle of the tracked target from the thermal camera to the aiming task. The kill share is used to terminate the task and stop the operation of the system. By using shares, task are able to communciate effectively and allows D.A.R.T.I.C.U.S to achieving the desired functionality.</p>
 <p>This following subsections will break down the task that are preformed in the main section of our program. Each section will elaborate on the states used for each task.</p>
 <h2><a class="anchor" id="Pivot"></a>
 Pivot</h2>
-<p>The Pivot task is responsible</p>
+<p>The Pivot task is responsible for turning the system on first Lazy Susan by 180 degrees in order to face the opposing team. This task begins by initialzing the PID controller with appropriate gains, setting a desired setpoint, and initalizing the encoder readers for feedback control. The turret runs until the desired setpoint is reached or falls within an acceptable range. Once the desired position is reached the GO1 flag is set. After completion the motor stops and enters an idle state until the task is terminated. The designed finite state machine is shown below.</p>
+<div class="image">
+<img src="pivotfsm.png" alt="" width="400"/>
+</div>
 <h2><a class="anchor" id="Aim"></a>
 Aim</h2>
+<p>The Aim task is responsible for controlling the Metal Gearmotor motor attached to the tier 2 turntable. The primary objective is to target the Nerf blaster with a high resolution. This task initalizes the PID controller with the appropriate gain values and sets the desired setpoint based on the tracked angle of the target recieved by the bullseye share. The bulleye share is sent from the tracking task that is recieving from the camera. Once the highest average is recieved the GO2 flag is set and is sent to the fire task. After the kill share is receieved that aim task ends. The designed finite state machine is shown below.</p>
+<div class="image">
+<img src="aimfsm.png" alt="" width="400"/>
+</div>
 <h2><a class="anchor" id="Fire"></a>
 Fire</h2>
+<p>The Fire task is responsible for firing our Nerf blaster usign a servo motor to trigger the system once the aim and pivot task are completed. This task checks if both the GO1 and GO2 are set and if so will activate the servo motor firing sequence. Once the system fires, the servo resets itself and the kill share is recieved to end the task. This is the final task that ensures the target is tracked and the pivot is complete. The designed finite state machine is shown below.</p>
+<div class="image">
+<img src="firefsm.png" alt="" width="400"/>
+</div>
 <h2><a class="anchor" id="Track"></a>
 Track</h2>
-</div></div><!-- PageDoc -->
+<p>The Track task is responsible for continuously monitoring and tracking the movement of our opponent using an infrared mlx camera. The mlx_camera.py retrieves real-time images and extracts the position of the tracked target using the highest averaging column. This task will continually update the bullseye share with the latest angle recieved so the Aim task can accurately align with the tracked target. Continually recieving the real-time data, this program was developed to effectively engage with moving targets. The designed finite state machine is shown below.</p>
+<div class="image">
+<img src="trackfsm.png" alt="" width="400"/>
+</div>
+ </div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"/>
 </div><!-- contents -->
 </div><!-- doc-content -->
