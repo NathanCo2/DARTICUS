@@ -4,6 +4,7 @@ var index =
       [ "iBOM", "index.html#iBOM", null ],
       [ "Modeling", "index.html#Modeling", null ]
     ] ],
+    [ "Organization", "index.html#Software", null ],
     [ "Tasks", "index.html#System", [
       [ "Pivot", "index.html#Pivot", null ],
       [ "Aim", "index.html#Aim", null ],
