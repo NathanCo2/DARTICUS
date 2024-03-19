@@ -6,31 +6,33 @@ spend all their energy dodging incoming bullets whilst DARTICUS does all the wor
 From working on DARTICUS, members of the team have learned how to design, integrate, wire and program a mechatronics system. 
 More specifically, the students have learned how to design motor and servo classes which allow them to drive multiple motor 
 objects for the base pulley system and the top geared system. 
- 
+
+ <img width="452" alt="Darticus" src="https://github.com/NathanCo2/DARTICUS/assets/156122419/812084c6-8635-43fa-9f2c-7f92980e53db">
 
 DARTICUS is broken down into three main subsystems: the base pulley system, the top geared system, and the servo trigger system. 
 The base pulley system and the top geared system are designed to provide rotation about the z-axis to spin DARTICUS. The base 
 pulley system is designed to pan the Nerf blaster the necessary 180 degrees to face the opponent. This subsystem is designed to 
 provide a fast and repeatable method of spinning the blaster 180 degrees by choosing to operate the bottom DC motor at a higher 
-speed while giving up accuracy. To compensate for the decreased accuracy, the 3D printed coupler has a hard-stop built into the 
+speed while giving up accuracy. To compensate for the decreased accuracy, the 3D-printed coupler has a hard stop built into the 
 design which interfaces with a stopper bolted to the base of DARTICUS. On the other hand, the top geared system is set to operate 
 at a slower speed but at a higher accuracy using a gear ratio of 1:3. The Nerf Rival blaster is attached to the top mount plate 
-using a mount that matches the rail profile at the top of the Nerf blaster. This mount angles the blaster at a 4 degree offset 
+using a mount that matches the rail profile at the top of the Nerf blaster. This mount angles the blaster at a 4-degree offset 
 to account for the distance between DARTICUS and the opponent. The servo trigger system utilizes a standoff adapter on the servo 
 horn to engage with the Nerf blaster trigger. The servo is securely attached to the Nerf blaster. To integrate the servo into the 
 electronics of DARTICUS, a voltage regulator needed to be implemented. Due to the DARTICUS requiring a 12V power supply for the 
 motors, the input voltage needed to be reduced to the specifications of the servo. By adding the voltage regulator and capacitors, 
 the input voltage for the servo is now 5V. To locate the opponent, a thermal camera is used to measure the heat signature of the 
 person. This camera is mounted on a stand that is placed at the middle of the distance between DARTICUS and the opponent. On the 
-off chance, DARTICUS malfunctions you can pull the bundled up red wires to cut power to the servo and the motors. 
+off chance, DARTICUS malfunctions you can pull the bundled-up red wires to cut power to the servo and the motors. 
 
-[ADD PICTURE OF TASK DIAGRAM]
+<img width="245" alt="taskdiagram" src="https://github.com/NathanCo2/DARTICUS/assets/156122419/5eccd2cb-d0d3-4128-8b99-2d2b20ce43f6">
+
 The software architecture for DARTICUS is broken down into four main tasks which uses multitasking through the function cotask. 
 The task of the highest priority is the “Aim” task. The Aim task uses the target angle obtained from the camera reading to tell 
 the motor what setpoint it needs to angle the Nerf blaster in the direction of the target. Once the task is completed, it sets 
 the GO2 flag true (GO2 = 1) and puts it into a share to communicate with other tasks in the future. The next task in terms of 
 next highest priority is the “Pivot” task. The Pivot task is responsible for driving the base pulley motor which has a predefined 
-setpoint to achieve the desired 180 degree rotation at the beginning of the duel. This motor only utilizes proportional control 
+setpoint to achieve the desired 180-degree rotation at the beginning of the duel. This motor only utilizes proportional control 
 to achieve the desired behavior in a short time. Once this task is completed, the GO1 flag will be set to True (GO1 = 1) which 
 uses a share to communicate with future tasks. Both tasks utilize the motor class to use the attributes setup in the motor driver, 
 encoder reader, and motor controller files developed in previous labs. The task that is 3rd in priority is the “Track” task. The 
@@ -39,7 +41,9 @@ extracts the column with the highest average heat signature. Then the tasks will
 in order to aim at the target measured by the camera and place it into a share for the Aim task. Lastly, the “Fire” task has the 
 lowest priority and has the purpose of triggering the servo to actuate the blaster trigger. The task looks to set whether the GO1 
 and the GO2 flags are True before moving the servo which ensures that the blaster is oriented in the correct direction. Please refer 
-to the Doxygen documentation to learn more about the software: [ADD LINK HERE].
+to the Doxygen documentation to learn more about the software: 
+
+[ADD LINK HERE].
 
 To develop a functional system, our team developed the code for each individual task to check verify that the base code functions 
 properly before integrating multitasking with cotask. Once the code for each task was developed, our team first tested the code 
