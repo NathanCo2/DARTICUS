@@ -43,7 +43,7 @@ lowest priority and has the purpose of triggering the servo to actuate the blast
 and the GO2 flags are True before moving the servo which ensures that the blaster is oriented in the correct direction. Please refer 
 to the Doxygen documentation to learn more about the software: 
 
-[ADD LINK HERE].
+https://nathanco2.github.io/DARTICUS/
 
 To develop a functional system, our team developed the code for each individual task to check verify that the base code functions 
 properly before integrating multitasking with cotask. Once the code for each task was developed, our team first tested the code 
