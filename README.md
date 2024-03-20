@@ -1,9 +1,9 @@
 # DARTICUS
  
-Meet DARTICUS aka Dueling Autonomous infraRed Tracking IronClad Unrivaled Sentry! The purpose behind DARTICUS is to provide 
-users who want to have a Nerf blaster duel with friends an autonomous method to compete in these duels. This allows users to 
+Meet DARTICUS, aka Dueling Autonomous infraRed Tracking IronClad Unrivaled Sentry! The purpose behind DARTICUS is to provide 
+users who want to have a Nerf blaster duel an autonomous method to compete in these duels. This allows users to 
 spend all their energy dodging incoming bullets whilst DARTICUS does all the work in terms of aiming and firing at the opponent. 
-From working on DARTICUS, members of the team have learned how to design, integrate, wire and program a mechatronics system. 
+From working on DARTICUS, members of the team have learned how to design, integrate, build, and program a mechatronics system. 
 More specifically, the students have learned how to design motor and servo classes which allow them to drive multiple motor 
 objects for the base pulley system and the top geared system. 
 
@@ -11,7 +11,7 @@ objects for the base pulley system and the top geared system.
 
 DARTICUS is broken down into three main subsystems: the base pulley system, the top geared system, and the servo trigger system. 
 The base pulley system and the top geared system are designed to provide rotation about the z-axis to spin DARTICUS. The base 
-pulley system is designed to pan the Nerf blaster the necessary 180 degrees to face the opponent. This subsystem is designed to 
+pulley system is designed to pan the Nerf blaster the necessary 180 degrees to face the opponent ath. This subsystem is designed to 
 provide a fast and repeatable method of spinning the blaster 180 degrees by choosing to operate the bottom DC motor at a higher 
 speed while giving up accuracy. To compensate for the decreased accuracy, the 3D-printed coupler has a hard stop built into the 
 design which interfaces with a stopper bolted to the base of DARTICUS. On the other hand, the top geared system is set to operate 
@@ -23,7 +23,7 @@ electronics of DARTICUS, a voltage regulator needed to be implemented. Due to th
 motors, the input voltage needed to be reduced to the specifications of the servo. By adding the voltage regulator and capacitors, 
 the input voltage for the servo is now 5V. To locate the opponent, a thermal camera is used to measure the heat signature of the 
 person. This camera is mounted on a stand that is placed at the middle of the distance between DARTICUS and the opponent. On the 
-off chance, DARTICUS malfunctions you can pull the bundled-up red wires to cut power to the servo and the motors. 
+off chance DARTICUS malfunctions, you can pull the bundled-up red wires to cut power to the servo and the motors. 
 
 <img width="500" alt="taskdiagram" src="https://github.com/NathanCo2/DARTICUS/assets/156122419/5eccd2cb-d0d3-4128-8b99-2d2b20ce43f6">
 
