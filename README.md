@@ -1,4 +1,6 @@
 # DARTICUS
+
+https://www.youtube.com/watch?v=c9Xg40ez_Ec&ab_channel=NathanChapman
  
 Meet DARTICUS, aka Dueling Autonomous infraRed Tracking IronClad Unrivaled Sentry! The purpose behind DARTICUS is to provide 
 users who want to have a Nerf blaster duel an autonomous method to compete in these duels. This allows users to 
